@@ -1,0 +1,1505 @@
+
+/* =========================================
+   CUREAI | SHARED HOMEPAGE DESIGN SYSTEM
+   Forest teal / warm ivory / botanical mint
+========================================= */
+
+.cure-home {
+  --cure-ink: #17352e;
+  --cure-deep: #102d27;
+  --cure-deeper: #09231f;
+  --cure-teal: #167866;
+  --cure-teal-hover: #105b4e;
+  --cure-mint: #83e4c5;
+  --cure-ivory: #f5f2e9;
+  --cure-paper: #fffdf7;
+  --cure-sage: #e6ece0;
+  --cure-muted: #63756c;
+  --cure-border: #dce2d7;
+
+  min-height: 100vh;
+  overflow: clip;
+  color: var(--cure-ink);
+  background: var(--cure-ivory);
+  font-family: "DM Sans", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cure-home *,
+.cure-home *::before,
+.cure-home *::after {
+  box-sizing: border-box;
+}
+
+.cure-home a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cure-home p {
+  overflow-wrap: anywhere;
+}
+
+.cure-home a:focus-visible {
+  outline: 3px solid var(--cure-teal);
+  outline-offset: 4px;
+}
+
+/* =========================================
+   BRAND AND NAVIGATION
+========================================= */
+
+.cure-header {
+  position: relative;
+  z-index: 5;
+  background: var(--cure-ivory);
+}
+
+.cure-navbar {
+  width: min(1240px, calc(100% - 88px));
+  min-height: 88px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  border-bottom: 1px solid var(--cure-border);
+}
+
+.cure-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  flex-shrink: 0;
+  color: var(--cure-ink);
+}
+
+.cure-brand-symbol {
+  width: 49px;
+  height: 52px;
+  flex: 0 0 auto;
+  color: var(--cure-teal);
+  transition: transform 220ms ease;
+}
+
+.cure-brand:hover .cure-brand-symbol {
+  transform: scale(1.04) rotate(-3deg);
+}
+
+.cure-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cure-brand-name {
+  color: var(--cure-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -1.15px;
+  line-height: 1;
+}
+
+.cure-brand-name span {
+  color: var(--cure-teal);
+}
+
+.cure-brand-tagline {
+  color: #697c70;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+}
+
+.cure-nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 38px);
+}
+
+.cure-nav-links a {
+  position: relative;
+  padding: 10px 0;
+  color: #50675c;
+  font-size: 12px;
+  font-weight: 650;
+  transition: color 180ms ease;
+}
+
+.cure-nav-links a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--cure-teal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease;
+}
+
+.cure-nav-links a:hover {
+  color: var(--cure-teal);
+}
+
+.cure-nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+/* Shared buttons */
+
+.cure-button {
+  min-height: 49px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 21px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.cure-button span {
+  font-size: 16px;
+  transition: transform 180ms ease;
+}
+
+.cure-button:hover span {
+  transform: translate(2px, -2px);
+}
+
+.cure-button-primary {
+  color: #fffdf7 !important;
+  background: var(--cure-teal);
+  box-shadow: 0 6px 16px rgb(16 91 78 / 15%);
+}
+
+.cure-button-primary:hover {
+  background: var(--cure-teal-hover);
+  box-shadow: 0 10px 24px rgb(16 91 78 / 22%);
+  transform: translateY(-2px);
+}
+
+.cure-button-outline {
+  border-color: #cbd8cc;
+  color: var(--cure-ink);
+  background: rgb(255 253 247 / 55%);
+}
+
+.cure-button-outline:hover {
+  border-color: var(--cure-teal);
+  background: var(--cure-paper);
+  transform: translateY(-2px);
+}
+
+.cure-nav-cta {
+  min-height: 43px;
+  padding: 0 17px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+/* =========================================
+   HERO
+========================================= */
+
+.cure-hero {
+  width: min(1240px, calc(100% - 88px));
+  min-height: 625px;
+  margin: 0 auto;
+  padding: 73px 0 82px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.94fr);
+  align-items: center;
+  gap: clamp(42px, 6vw, 82px);
+}
+
+.cure-hero-copy {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.cure-eyebrow {
+  width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--cure-teal);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 1.55px;
+  line-height: 1.7;
+}
+
+.cure-eyebrow-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #369b7c;
+  box-shadow: 0 0 0 4px rgb(54 155 124 / 13%);
+}
+
+.cure-hero h1 {
+  margin: 27px 0 22px;
+  color: var(--cure-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(49px, 5.2vw, 75px);
+  font-weight: 500;
+  line-height: 1.075;
+  letter-spacing: -3.4px;
+}
+
+.cure-hero h1 span {
+  color: var(--cure-teal);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.cure-hero-description {
+  max-width: 490px;
+  margin: 0;
+  color: var(--cure-muted);
+  font-size: 14px;
+  line-height: 1.95;
+}
+
+.cure-hero-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 31px;
+}
+
+.cure-trust-note {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 30px;
+}
+
+.cure-trust-note > span {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid #c9ddcc;
+  border-radius: 50%;
+  color: var(--cure-teal);
+  background: #e4eddf;
+  font-size: 13px;
+}
+
+.cure-trust-note p {
+  margin: 0;
+  color: #62766a;
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* =========================================
+   HERO ARTWORK
+========================================= */
+
+.cure-hero-art {
+  min-width: 0;
+  min-height: 475px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid #d3e0d1;
+  border-radius: 47% 47% 24px 24px;
+  background:
+    radial-gradient(
+      ellipse at 50% 44%,
+      #fffdf7 0%,
+      #edf3e7 43%,
+      #dce8d9 100%
+    );
+  box-shadow: inset 0 0 45px rgb(43 100 73 / 4%);
+}
+
+.cure-art-glow {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  width: 285px;
+  height: 285px;
+  border-radius: 50%;
+  background: rgb(132 205 164 / 38%);
+  filter: blur(38px);
+  transform: translate(-50%, -50%);
+}
+
+.cure-art-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid #c4d9c8;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cure-art-ring-one {
+  width: 250px;
+  height: 250px;
+}
+
+.cure-art-ring-two {
+  width: 355px;
+  height: 355px;
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.cure-art-orbit-label {
+  position: absolute;
+  top: 29px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #526f60;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 1.45px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.cure-art-orbit-label span:nth-child(2) {
+  color: var(--cure-teal);
+  font-size: 14px;
+}
+
+.cure-art-heart {
+  width: 265px;
+  max-width: 72%;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: var(--cure-teal);
+  animation: cure-heart-float 6s ease-in-out infinite;
+}
+
+.cure-art-heart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 13px 16px rgb(23 80 62 / 10%));
+}
+
+.cure-art-chip {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  max-width: calc(100% - 24px);
+  padding: 13px 15px;
+  border: 1px solid #dce5d9;
+  border-radius: 13px;
+  background: #fffdf9;
+  box-shadow: 0 12px 27px rgb(23 53 46 / 11%);
+  animation: cure-chip-float 5.5s ease-in-out infinite;
+}
+
+.cure-art-chip-top {
+  top: 83px;
+  right: 12px;
+}
+
+.cure-art-chip-bottom {
+  bottom: 69px;
+  left: 12px;
+  animation-delay: -2.7s;
+}
+
+.cure-chip-icon {
+  width: 39px;
+  height: 39px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #126d5c;
+  background: #dcefe2;
+  font-size: 20px;
+}
+
+.cure-chip-icon-peach {
+  color: #a9603e;
+  background: #f8e5d5;
+}
+
+.cure-art-chip strong,
+.cure-art-chip small {
+  display: block;
+}
+
+.cure-art-chip strong {
+  color: var(--cure-ink);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.cure-art-chip small {
+  margin-top: 4px;
+  color: #66796c;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.cure-art-caption {
+  position: absolute;
+  right: 12px;
+  bottom: 18px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #526c5c;
+  font-size: 10px;
+  text-align: center;
+}
+
+.cure-art-caption > span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #399a76;
+}
+
+@keyframes cure-heart-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes cure-chip-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* =========================================
+   ASSESSMENT CATEGORIES
+========================================= */
+
+.cure-assessments {
+  padding: 100px 0 96px;
+  background: var(--cure-paper);
+}
+
+.cure-section-intro {
+  width: min(1200px, calc(100% - 88px));
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.78fr);
+  column-gap: 50px;
+  align-items: end;
+}
+
+.cure-section-intro > .cure-eyebrow {
+  grid-column: 1 / -1;
+  margin-bottom: 17px;
+}
+
+.cure-section-intro h2,
+.cure-how-heading h2 {
+  margin: 0;
+  color: var(--cure-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 4.1vw, 54px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -2px;
+}
+
+.cure-section-intro h2 span,
+.cure-how-heading h2 span {
+  color: var(--cure-teal);
+  font-style: italic;
+}
+
+.cure-section-intro > p {
+  max-width: 430px;
+  margin: 0 0 5px;
+  color: var(--cure-muted);
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+.cure-assessment-grid {
+  width: min(1200px, calc(100% - 88px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.cure-assessment-card {
+  --card-accent: #167866;
+  --card-tint: #e2eee4;
+
+  min-width: 0;
+  min-height: 320px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px 21px 20px;
+  overflow: hidden;
+  border: 1px solid #dfe5da;
+  border-radius: 15px;
+  color: var(--cure-ink);
+  background: #f8f7f0;
+  isolation: isolate;
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.cure-assessment-card::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--card-accent);
+}
+
+.cure-assessment-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--card-accent);
+  background: #fffdf8;
+  box-shadow: 0 17px 36px rgb(23 53 46 / 9%);
+}
+
+.cure-card-lavender {
+  --card-accent: #7864aa;
+  --card-tint: #ebe5f6;
+}
+
+.cure-card-peach {
+  --card-accent: #b76f4b;
+  --card-tint: #f8e6d8;
+}
+
+.cure-card-blue {
+  --card-accent: #477ba9;
+  --card-tint: #e0ebf7;
+}
+
+.cure-card-pink {
+  --card-accent: #ad5d7d;
+  --card-tint: #f5e1e9;
+}
+
+.cure-assessment-top {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 27px;
+}
+
+.cure-assessment-icon {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 17%, white);
+  border-radius: 13px;
+  color: var(--card-accent);
+  background: var(--card-tint);
+  font-size: 25px;
+  transition: transform 200ms ease;
+}
+
+.cure-assessment-card:hover .cure-assessment-icon {
+  transform: rotate(-4deg) scale(1.05);
+}
+
+.cure-assessment-number {
+  color: #78877c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-style: italic;
+}
+
+.cure-assessment-status {
+  position: relative;
+  z-index: 1;
+  color: var(--card-accent);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.75px;
+  line-height: 1.7;
+}
+
+.cure-assessment-card h3 {
+  position: relative;
+  z-index: 1;
+  margin: 11px 0 10px;
+  color: var(--cure-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+
+.cure-assessment-card > p {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 23px;
+  color: #5f7267;
+  font-size: 11px;
+  line-height: 1.9;
+}
+
+.cure-assessment-link {
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #dfe5da;
+  color: var(--card-accent);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.cure-assessment-link > span {
+  font-size: 16px;
+  transition: transform 180ms ease;
+}
+
+.cure-assessment-card:hover .cure-assessment-link > span {
+  transform: translate(3px, -3px);
+}
+
+.cure-card-watermark {
+  position: absolute;
+  z-index: 0;
+  right: -8px;
+  bottom: 42px;
+  color: var(--card-accent);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 90px;
+  line-height: 1;
+  opacity: 0.075;
+  pointer-events: none;
+  transform: rotate(-10deg);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.cure-assessment-card:hover .cure-card-watermark {
+  opacity: 0.12;
+  transform: rotate(0deg) scale(1.05);
+}
+
+.cure-disclaimer {
+  width: min(1200px, calc(100% - 88px));
+  margin: 27px auto 0;
+  padding: 3px 0 3px 14px;
+  border-left: 3px solid #8cbba0;
+  color: #607268;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+/* =========================================
+   HOW IT WORKS
+========================================= */
+
+.cure-how {
+  position: relative;
+  padding: 94px 0 100px;
+  overflow: hidden;
+  color: #f7f6ee;
+  background:
+    radial-gradient(
+      ellipse at 90% 0%,
+      rgb(67 132 103 / 25%),
+      transparent 43%
+    ),
+    linear-gradient(135deg, #12362e 0%, #0d2c26 55%, #09231f 100%);
+}
+
+.cure-how::before {
+  content: "";
+  position: absolute;
+  top: -155px;
+  left: -125px;
+  width: 340px;
+  height: 340px;
+  border: 1px solid rgb(220 245 224 / 10%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 35px rgb(220 245 224 / 3%),
+    0 0 0 75px rgb(220 245 224 / 2%);
+  pointer-events: none;
+}
+
+.cure-how-heading,
+.cure-steps {
+  width: min(1200px, calc(100% - 88px));
+  margin-inline: auto;
+}
+
+.cure-how-heading {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 42px;
+}
+
+.cure-how .cure-eyebrow {
+  color: var(--cure-mint);
+}
+
+.cure-how .cure-eyebrow-dot {
+  background: var(--cure-mint);
+  box-shadow: 0 0 0 4px rgb(131 228 197 / 14%);
+}
+
+.cure-how-heading h2 {
+  margin-top: 17px;
+  color: #fffdf7;
+}
+
+.cure-how-heading h2 span {
+  color: var(--cure-mint);
+}
+
+.cure-how-heading > p {
+  max-width: 480px;
+  margin: 18px 0 0;
+  color: #c4d5ca;
+  font-size: 13px;
+  line-height: 1.95;
+}
+
+.cure-steps {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.cure-step {
+  min-width: 0;
+  min-height: 220px;
+  padding: 26px;
+  border: 1px solid rgb(230 246 233 / 16%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 5%);
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    background 200ms ease;
+}
+
+.cure-step:hover {
+  transform: translateY(-4px);
+  border-color: rgb(131 228 197 / 42%);
+  background: rgb(255 255 255 / 8%);
+}
+
+.cure-step-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.cure-step-number {
+  color: var(--cure-mint);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  line-height: 1;
+}
+
+.cure-step-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(131 228 197 / 27%);
+  border-radius: 11px;
+  color: var(--cure-mint);
+  background: rgb(131 228 197 / 9%);
+  font-size: 19px;
+}
+
+.cure-step h3 {
+  margin: 27px 0 10px;
+  color: #fffdf7;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+
+.cure-step p {
+  margin: 0;
+  color: #c4d5ca;
+  font-size: 11px;
+  line-height: 1.95;
+}
+
+/* =========================================
+   RESPONSIBLE AI
+========================================= */
+
+.cure-safety {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 22px;
+  padding: 78px max(44px, calc((100% - 1200px) / 2));
+  overflow: hidden;
+  background: #e9eee3;
+}
+
+.cure-safety-decoration {
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  width: 170px;
+  color: #c3d8c7;
+  opacity: 0.45;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.cure-safety-decoration svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cure-safety-icon {
+  width: 51px;
+  height: 51px;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid #cfdfcf;
+  border-radius: 14px;
+  color: var(--cure-teal);
+  background: #dce8d9;
+  font-size: 24px;
+}
+
+.cure-safety-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 750px;
+}
+
+.cure-safety-label {
+  color: var(--cure-teal);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 1.5px;
+}
+
+.cure-safety h2 {
+  margin: 12px 0 13px;
+  color: var(--cure-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 500;
+  line-height: 1.23;
+  letter-spacing: -1.1px;
+}
+
+.cure-safety-copy p {
+  margin: 0;
+  color: #52695c;
+  font-size: 12px;
+  line-height: 2;
+}
+
+.cure-safety-signoff {
+  position: relative;
+  z-index: 1;
+  align-self: end;
+  padding-bottom: 4px;
+  color: var(--cure-teal);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 14px;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+.cure-footer {
+  width: min(1240px, calc(100% - 88px));
+  min-height: 116px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: var(--cure-ivory);
+}
+
+.cure-brand-footer .cure-brand-symbol {
+  width: 41px;
+  height: 44px;
+}
+
+.cure-brand-footer .cure-brand-name {
+  font-size: 22px;
+}
+
+.cure-brand-footer .cure-brand-tagline {
+  font-size: 6px;
+}
+
+.cure-footer > p {
+  margin: 0;
+  color: #617368;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.cure-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.cure-footer-links a {
+  color: #50675c;
+  font-size: 11px;
+  font-weight: 650;
+  transition: color 180ms ease;
+}
+
+.cure-footer-links a:hover {
+  color: var(--cure-teal);
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 1050px) {
+  .cure-navbar,
+  .cure-hero,
+  .cure-footer {
+    width: calc(100% - 56px);
+  }
+
+  .cure-nav-links {
+    gap: 19px;
+  }
+
+  .cure-hero {
+    min-height: 560px;
+    gap: 32px;
+  }
+
+  .cure-hero h1 {
+    font-size: clamp(45px, 5.5vw, 62px);
+    letter-spacing: -2.7px;
+  }
+
+  .cure-hero-art {
+    min-height: 420px;
+  }
+
+  .cure-art-ring-two {
+    width: 300px;
+    height: 300px;
+  }
+
+  .cure-art-chip {
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .cure-art-chip-top {
+    right: 8px;
+  }
+
+  .cure-art-chip-bottom {
+    left: 8px;
+  }
+
+  .cure-section-intro,
+  .cure-assessment-grid,
+  .cure-disclaimer,
+  .cure-how-heading,
+  .cure-steps {
+    width: calc(100% - 56px);
+  }
+
+  .cure-assessment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cure-assessment-card {
+    min-height: 285px;
+    padding: 23px;
+  }
+
+  .cure-safety {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+  .cure-safety-signoff {
+    white-space: normal;
+    text-align: right;
+  }
+
+  .cure-footer {
+    flex-wrap: wrap;
+    padding: 24px 0;
+  }
+
+  .cure-footer-links {
+    gap: 15px;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 760px) {
+  .cure-navbar,
+  .cure-hero,
+  .cure-footer {
+    width: calc(100% - 36px);
+  }
+
+  .cure-navbar {
+    min-height: 76px;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 13px 0;
+  }
+
+  .cure-brand-symbol {
+    width: 41px;
+    height: 44px;
+  }
+
+  .cure-brand-name {
+    font-size: 23px;
+  }
+
+  .cure-brand-tagline {
+    font-size: 6px;
+    letter-spacing: 1.2px;
+  }
+
+  .cure-nav-cta {
+    min-height: 40px;
+    padding: 0 12px;
+    gap: 7px;
+    font-size: 10px;
+  }
+
+  .cure-nav-links {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: clamp(17px, 5vw, 32px);
+    padding: 7px 0 2px;
+  }
+
+  .cure-nav-links a {
+    font-size: 11px;
+  }
+
+  .cure-hero {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+    padding: 51px 0 62px;
+  }
+
+  .cure-hero h1 {
+    margin-top: 23px;
+    font-size: clamp(45px, 9vw, 61px);
+    letter-spacing: -2.7px;
+  }
+
+  .cure-hero-description {
+    max-width: 540px;
+    font-size: 13px;
+  }
+
+  .cure-hero-art {
+    width: 100%;
+    min-height: 400px;
+    border-radius: 42% 42% 20px 20px;
+  }
+
+  .cure-section-intro,
+  .cure-assessment-grid,
+  .cure-disclaimer,
+  .cure-how-heading,
+  .cure-steps {
+    width: calc(100% - 36px);
+  }
+
+  .cure-assessments {
+    padding: 69px 0 73px;
+  }
+
+  .cure-section-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    margin-bottom: 30px;
+  }
+
+  .cure-section-intro > .cure-eyebrow {
+    margin-bottom: 15px;
+  }
+
+  .cure-section-intro h2,
+  .cure-how-heading h2 {
+    font-size: clamp(36px, 7vw, 46px);
+    letter-spacing: -1.6px;
+  }
+
+  .cure-section-intro > p {
+    margin-top: 16px;
+    font-size: 12px;
+  }
+
+  .cure-assessment-grid {
+    gap: 14px;
+  }
+
+  .cure-assessment-card {
+    min-height: 270px;
+    padding: 22px;
+  }
+
+  .cure-assessment-card h3 {
+    font-size: 21px;
+  }
+
+  .cure-assessment-card > p {
+    font-size: 11px;
+  }
+
+  .cure-how {
+    padding: 69px 0 74px;
+  }
+
+  .cure-how-heading {
+    margin-bottom: 30px;
+  }
+
+  .cure-how-heading > p {
+    font-size: 12px;
+  }
+
+  .cure-steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 13px;
+  }
+
+  .cure-step {
+    min-height: 0;
+    padding: 23px;
+  }
+
+  .cure-step h3 {
+    margin-top: 20px;
+  }
+
+  .cure-safety {
+    grid-template-columns: 43px minmax(0, 1fr);
+    gap: 15px;
+    padding: 56px 22px;
+  }
+
+  .cure-safety-decoration {
+    right: -40px;
+    width: 145px;
+    opacity: 0.23;
+  }
+
+  .cure-safety-icon {
+    width: 43px;
+    height: 43px;
+  }
+
+  .cure-safety h2 {
+    font-size: 28px;
+  }
+
+  .cure-safety-signoff {
+    grid-column: 2;
+    justify-self: start;
+    text-align: left;
+  }
+
+  .cure-footer {
+    min-height: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 19px;
+    padding: 26px 0;
+  }
+
+  .cure-footer-links {
+    justify-content: flex-start;
+    gap: 15px 20px;
+  }
+}
+
+/* =========================================
+   SMALL PHONES
+========================================= */
+
+@media (max-width: 420px) {
+  .cure-navbar,
+  .cure-hero,
+  .cure-footer {
+    width: calc(100% - 30px);
+  }
+
+  .cure-brand {
+    gap: 7px;
+  }
+
+  .cure-brand-symbol {
+    width: 35px;
+    height: 38px;
+  }
+
+  .cure-brand-name {
+    font-size: 20px;
+  }
+
+  .cure-brand-tagline {
+    font-size: 5.5px;
+    letter-spacing: 0.95px;
+  }
+
+  .cure-nav-cta {
+    min-height: 37px;
+    padding: 0 9px;
+    font-size: 9px;
+  }
+
+  .cure-nav-links {
+    gap: 16px;
+  }
+
+  .cure-nav-links a {
+    font-size: 10px;
+  }
+
+  .cure-hero {
+    padding-top: 41px;
+    gap: 29px;
+  }
+
+  .cure-eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.05px;
+  }
+
+  .cure-hero h1 {
+    font-size: clamp(39px, 10vw, 47px);
+    letter-spacing: -2px;
+  }
+
+  .cure-hero-description {
+    font-size: 12px;
+    line-height: 1.9;
+  }
+
+  .cure-hero-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cure-button {
+    width: 100%;
+  }
+
+  .cure-hero-art {
+    min-height: 340px;
+    border-radius: 38% 38% 18px 18px;
+  }
+
+  .cure-art-ring-one {
+    width: 185px;
+    height: 185px;
+  }
+
+  .cure-art-ring-two {
+    width: 265px;
+    height: 265px;
+  }
+
+  .cure-art-heart {
+    width: 205px;
+  }
+
+  .cure-art-chip {
+    gap: 7px;
+    padding: 9px;
+  }
+
+  .cure-art-chip-top {
+    top: 48px;
+    right: 6px;
+  }
+
+  .cure-art-chip-bottom {
+    bottom: 48px;
+    left: 6px;
+  }
+
+  .cure-chip-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .cure-art-chip strong {
+    font-size: 8px;
+  }
+
+  .cure-art-chip small {
+    font-size: 7px;
+  }
+
+  .cure-art-orbit-label {
+    top: 19px;
+    gap: 6px;
+    font-size: 7px;
+  }
+
+  .cure-art-caption {
+    bottom: 12px;
+    font-size: 8px;
+  }
+
+  .cure-section-intro,
+  .cure-assessment-grid,
+  .cure-disclaimer,
+  .cure-how-heading,
+  .cure-steps {
+    width: calc(100% - 30px);
+  }
+
+  .cure-section-intro h2,
+  .cure-how-heading h2 {
+    font-size: 34px;
+  }
+
+  .cure-assessment-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cure-assessment-card {
+    min-height: 250px;
+    padding: 22px;
+  }
+
+  .cure-safety {
+    padding: 46px 15px;
+    gap: 12px;
+  }
+
+  .cure-safety h2 {
+    font-size: 24px;
+  }
+
+  .cure-safety-copy p {
+    font-size: 11px;
+  }
+
+  .cure-footer-links {
+    gap: 14px;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .cure-home *,
+  .cure-home *::before,
+  .cure-home *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
