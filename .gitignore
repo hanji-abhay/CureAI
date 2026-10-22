@@ -12,3 +12,7 @@ __pycache__/
 *.py[cod]
 .DS_Store
 Thumbs.db
+
+# Large thyroid model artifacts (regenerate with ML training scripts)
+ml/models/thyroid_api_model.joblib
+ml/models/thyroid_random_forest.joblib
