@@ -1,20 +1,63 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function Login() {
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [message, setMessage] = useState('')
+  const navigate = useNavigate()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  function handleSubmit(event) {
-    event.preventDefault()
-    setMessage(
-      'Your login form is ready. Authentication will be connected when the backend is implemented.'
+async function handleSubmit(event) {
+  event.preventDefault()
+
+  if (isSubmitting) return
+
+  setMessage('')
+  setIsSubmitting(true)
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          rememberMe,
+        }),
+      }
     )
-  }
 
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok || !data.success || !data.token || !data.user) {
+      setMessage(data.message || 'Unable to sign in. Please try again.')
+      return
+    }
+
+    // Update the shared authentication state and save the user.
+    login(data.token, data.user)
+
+    setMessage('Login successful! Redirecting...')
+
+    navigate('/dashboard', { replace: true })
+  } catch {
+    setMessage(
+      'Could not connect to CureAI. Please check that the backend is running.'
+    )
+  } finally {
+    setIsSubmitting(false)
+  }
+}
   return (
     <main className="login-page">
       <style>{`
@@ -678,8 +721,15 @@ function Login() {
               </Link>
             </div>
 
-            <button type="submit" className="login-submit">
-              Sign in <span className="login-submit-arrow">→</span>
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Signing in...' : 'Sign in'}
+              {!isSubmitting && (
+                <span className="login-submit-arrow">→</span>
+              )}
             </button>
 
             {message && (

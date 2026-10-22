@@ -1,14 +1,58 @@
-
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_BASE_URL
+
 function ForgotPassword() {
   const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState(false)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setSubmitted(true)
+
+    if (isSubmitting) return
+
+    setIsSubmitting(true)
+    setMessage('')
+    setError(false)
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/auth/forgot-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+          }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || 'Unable to process your request. Please try again.'
+        )
+      }
+
+      setMessage(
+        data.message ||
+          'If an account exists for that email, recovery instructions will be sent.'
+      )
+    } catch (err) {
+      setError(true)
+      setMessage(
+        err.message ||
+          'Unable to connect to CureAI. Please try again.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -106,23 +150,38 @@ function ForgotPassword() {
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value)
-                  setSubmitted(false)
+                  setMessage('')
+                  setError(false)
                 }}
                 required
               />
             </div>
 
-            <button className="cf-submit" type="submit">
-              Continue&nbsp; ↗
+            <button
+              className="cf-submit"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Sending request...' : 'Continue ↗'}
             </button>
           </form>
 
-          {submitted && (
-            <div className="cf-message" role="status">
-              <strong>Form submitted for preview</strong>
-              Your email passed browser validation. Password recovery is not
-              connected yet, so no email has been sent and no account has been
-              changed.
+          {message && (
+            <div
+              className="cf-message"
+              role={error ? 'alert' : 'status'}
+              style={
+                error
+                  ? {
+                      borderColor: '#f0d2cc',
+                      background: '#fff1ee',
+                      color: '#983e32',
+                    }
+                  : undefined
+              }
+            >
+              <strong>{error ? 'Request unsuccessful' : 'Check your inbox'}</strong>
+              {message}
             </div>
           )}
 
