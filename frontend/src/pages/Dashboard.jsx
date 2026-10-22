@@ -1,5 +1,5 @@
-
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const assessments = [
   {
@@ -70,6 +70,21 @@ const quickLinks = [
 ]
 
 function Dashboard() {
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+
+  const firstName = user?.fullName?.trim().split(/\s+/)[0]
+
+  async function handleLogout() {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout request failed:', error)
+    } finally {
+      navigate('/login', { replace: true })
+    }
+  }
+
   return (
     <div className="cure-dashboard">
       <style>{`
@@ -86,15 +101,6 @@ function Dashboard() {
         }
         .cure-dashboard * { box-sizing: border-box; }
         .cd-shell { display: flex; min-height: 100vh; }
-        .cd-sidebar {
-          width: 248px;
-          flex-shrink: 0;
-          padding: 30px 20px;
-          display: flex;
-          flex-direction: column;
-          background: #fffefa;
-          border-right: 1px solid var(--cd-line);
-        }
         .cd-brand {
           display: flex;
           align-items: center;
@@ -116,13 +122,6 @@ function Dashboard() {
         }
         .cd-brand-name { font-size: 21px; font-weight: 750; letter-spacing: -1px; }
         .cd-brand-tag { display: block; margin-top: 3px; color: var(--cd-muted); font-size: 8px; letter-spacing: 1.2px; }
-        .cd-nav-label {
-          margin: 44px 10px 13px;
-          color: #9aa69e;
-          font-size: 10px;
-          font-weight: 750;
-          letter-spacing: 1.7px;
-        }
         .cd-nav { display: grid; gap: 7px; }
         .cd-nav a {
           display: flex;
@@ -163,6 +162,23 @@ function Dashboard() {
         .cd-breadcrumb { color: var(--cd-muted); font-size: 12px; }
         .cd-breadcrumb strong { color: var(--cd-ink); font-weight: 700; }
         .cd-top-actions { display: flex; align-items: center; gap: 12px; }
+        .cd-logout-button {
+          padding: 9px 12px;
+          border: 1px solid var(--cd-line);
+          border-radius: 9px;
+          background: #fffefa;
+          color: var(--cd-green);
+          font: inherit;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background .2s, border-color .2s;
+        }
+        .cd-logout-button:hover {
+          background: #edf2e9;
+          border-color: #c6d6c8;
+        }
+
         .cd-preview-pill {
           display: inline-flex;
           align-items: center;
@@ -329,59 +345,6 @@ function Dashboard() {
       `}</style>
 
       <div className="cd-shell">
-        <aside className="cd-sidebar">
-          <Link to="/" className="cd-brand" aria-label="CureAI home">
-            <span className="cd-brand-mark">C</span>
-            <span className="cd-brand-copy">
-              <span className="cd-brand-name">CureAI</span>
-              <span className="cd-brand-tag">INTELLIGENCE FOR WELLNESS</span>
-            </span>
-          </Link>
-
-          <div className="cd-nav-label">WORKSPACE</div>
-
-          <nav className="cd-nav" aria-label="Main navigation">
-            <Link to="/dashboard" className="cd-active" aria-current="page">
-              <span className="cd-nav-icon">⌂</span>
-              <span className="cd-nav-text">Dashboard</span>
-            </Link>
-            <Link to="/">
-              <span className="cd-nav-icon">✳</span>
-              <span className="cd-nav-text">Explore CureAI</span>
-            </Link>
-            <Link to="/history">
-              <span className="cd-nav-icon">◷</span>
-              <span className="cd-nav-text">My history</span>
-            </Link>
-            <Link to="/reports">
-              <span className="cd-nav-icon">▤</span>
-              <span className="cd-nav-text">My reports</span>
-            </Link>
-          </nav>
-
-          <div className="cd-nav-label">ACCOUNT</div>
-
-          <nav className="cd-nav" aria-label="Account navigation">
-            <Link to="/profile">
-              <span className="cd-nav-icon">◎</span>
-              <span className="cd-nav-text">My profile</span>
-            </Link>
-            <Link to="/login">
-              <span className="cd-nav-icon">↗</span>
-              <span className="cd-nav-text">Sign in</span>
-            </Link>
-          </nav>
-
-          <div className="cd-sidebar-bottom">
-            <div className="cd-help">
-              <div className="cd-help-icon">✳</div>
-              <h3>Your health matters.</h3>
-              <p>CureAI helps you organise health information, not replace professional care.</p>
-              <Link to="/">Learn about CureAI ↗</Link>
-            </div>
-          </div>
-        </aside>
-
         <main className="cd-main">
           <header className="cd-topbar">
             <div className="cd-breadcrumb">
@@ -396,17 +359,31 @@ function Dashboard() {
                 to="/profile"
                 className="cd-avatar"
                 aria-label="Open profile"
+                title={user?.fullName || 'Open profile'}
                 style={{ textDecoration: 'none' }}
               >
-                ♡
+                {firstName ? firstName.charAt(0).toUpperCase() : '♡'}
               </Link>
+
+              <button
+                type="button"
+                className="cd-logout-button"
+                onClick={handleLogout}
+              >
+                Log out
+              </button>
+
             </div>
           </header>
 
           <div className="cd-content">
             <section className="cd-welcome">
               <div>
-                <div className="cd-eyebrow">YOUR PERSONAL WELLNESS SPACE</div>
+                <div className="cd-eyebrow">
+                  {firstName
+                    ? `WELCOME BACK, ${firstName.toUpperCase()}`
+                    : 'YOUR PERSONAL WELLNESS SPACE'}
+                </div>
                 <h1>A little more informed.<br />A little more empowered.</h1>
                 <p>
                   Welcome to CureAI. Explore guided health questionnaires,

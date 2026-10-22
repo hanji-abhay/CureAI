@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link,  useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 
 function Register() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -11,40 +14,90 @@ function Register() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState('error')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+async function handleSubmit(event) {
+  event.preventDefault()
 
-  function handleSubmit(event) {
-    event.preventDefault()
-    setMessage('')
+  if (isSubmitting) return
 
-    if (fullName.trim().length < 2) {
-      setMessage('Please enter your full name.')
+  setMessage('')
+
+  // Validate the form before making an API request.
+  if (fullName.trim().length < 2) {
+    setMessage('Please enter your full name.')
+    setMessageType('error')
+    return
+  }
+
+  if (password.length < 8) {
+    setMessage('Your password must contain at least 8 characters.')
+    setMessageType('error')
+    return
+  }
+
+  if (password !== confirmPassword) {
+    setMessage('Your passwords do not match. Please check them.')
+    setMessageType('error')
+    return
+  }
+
+  if (!acceptedTerms) {
+    setMessage('Please acknowledge the terms before continuing.')
+    setMessageType('error')
+    return
+  }
+
+  setIsSubmitting(true)
+
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password,
+        }),
+      }
+    )
+
+    const data = await response.json().catch(() => ({}))
+
+    if (
+      !response.ok ||
+      !data.success ||
+      !data.token ||
+      !data.user
+    ) {
+      setMessage(
+        data.message || 'Unable to create your account. Please try again.'
+      )
       setMessageType('error')
       return
     }
 
-    if (password.length < 8) {
-      setMessage('Your password must contain at least 8 characters.')
-      setMessageType('error')
-      return
-    }
+    // Store the access token in memory and share the user with the app.
+    login(data.token, data.user)
 
-    if (password !== confirmPassword) {
-      setMessage('Your passwords do not match. Please check them.')
-      setMessageType('error')
-      return
-    }
-
-    if (!acceptedTerms) {
-      setMessage('Please acknowledge the terms before continuing.')
-      setMessageType('error')
-      return
-    }
+    // Registration is complete. Open the protected dashboard.
+    navigate('/dashboard', { replace: true })
+  } catch (error) {
+    console.error('Registration request failed:', error)
 
     setMessage(
-      'Your details passed the basic checks. Account creation will be enabled when secure backend authentication is connected.'
+      'Could not connect to CureAI. Please check that the backend server is running and try again.'
     )
-    setMessageType('success')
+    setMessageType('error')
+  } finally {
+    setIsSubmitting(false)
   }
+}
 
   return (
     <main className="register-page">
@@ -703,8 +756,13 @@ function Register() {
               </span>
             </label>
 
-            <button type="submit" className="register-submit">
-              Create account <span aria-hidden="true">→</span>
+            <button
+              type="submit"
+              className="register-submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating account...' : 'Create account'}
+              {!isSubmitting && <span aria-hidden="true">→</span>}
             </button>
 
             {message && (

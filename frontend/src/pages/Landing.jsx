@@ -154,7 +154,7 @@ export default function Landing({ onComplete }) {
       </div>
 
       <div className="intro-tagline" aria-hidden="true">
-        INTELLIGENCE FOR HEALTH
+        INTELLIGENCE FOR WELLNESS
       </div>
 
       <div className="intro-progress" aria-hidden="true">

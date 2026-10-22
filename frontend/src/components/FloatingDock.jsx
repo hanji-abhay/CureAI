@@ -2,16 +2,31 @@
 import { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
-const navigation = [
-  { label: 'Home', path: '/', icon: 'home' },
-  { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
-  { label: 'Thyroid', path: '/assessments/thyroid', icon: 'thyroid' },
-  { label: 'Skin', path: '/assessments/skin', icon: 'skin' },
-  { label: 'Lung', path: '/assessments/lung', icon: 'lung' },
-  { label: 'Breast', path: '/assessments/breast', icon: 'breast' },
-  { label: 'History', path: '/history', icon: 'history' },
-  { label: 'Reports', path: '/reports', icon: 'reports' },
-  { label: 'Profile', path: '/profile', icon: 'profile' },
+const groups = [
+  {
+    title: 'OVERVIEW',
+    items: [
+      { label: 'Home', path: '/', icon: 'home' },
+      { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
+    ],
+  },
+  {
+    title: 'ASSESSMENTS',
+    items: [
+      { label: 'Thyroid', path: '/assessments/thyroid', icon: 'thyroid' },
+      { label: 'Skin', path: '/assessments/skin', icon: 'skin' },
+      { label: 'Lung', path: '/assessments/lung', icon: 'lung' },
+      { label: 'Breast', path: '/assessments/breast', icon: 'breast' },
+    ],
+  },
+  {
+    title: 'YOUR SPACE',
+    items: [
+      { label: 'History', path: '/history', icon: 'history' },
+      { label: 'Reports', path: '/reports', icon: 'reports' },
+      { label: 'Profile', path: '/profile', icon: 'profile' },
+    ],
+  },
 ]
 
 function DockIcon({ name, size = 19 }) {
@@ -96,9 +111,17 @@ function DockIcon({ name, size = 19 }) {
         <path d="M8 9h.01M16 9h.01M8 15c2 2 6 2 8 0" />
       </>
     ),
-    close: (
+    close: <path d="m6 6 12 12M18 6 6 18" />,
+    expand: (
       <>
-        <path d="m6 6 12 12M18 6 6 18" />
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16M14 9h3M14 13h3" />
+      </>
+    ),
+    collapse: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M15 4v16M7 9h3M7 13h3" />
       </>
     ),
   }
@@ -109,11 +132,12 @@ function DockIcon({ name, size = 19 }) {
 function FloatingDock() {
   const [hovered, setHovered] = useState(false)
   const [pinned, setPinned] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+  const [wide, setWide] = useState(false)
   const location = useLocation()
 
-  const expanded = hovered || pinned
+  const expanded = pinned || (hovered && !dismissed)
 
-  // Avoid covering authentication and account recovery screens.
   const authPaths = [
     '/login',
     '/register',
@@ -121,15 +145,28 @@ function FloatingDock() {
     '/reset-password',
   ]
 
-  if (authPaths.includes(location.pathname)) {
-    return null
+  if (authPaths.includes(location.pathname)) return null
+
+  function handleTriggerClick() {
+    if (pinned || (hovered && !dismissed)) {
+      setPinned(false)
+      setDismissed(true)
+      setHovered(false)
+    } else {
+      setPinned(true)
+      setDismissed(false)
+    }
   }
 
   return (
     <div
-      className={`cure-dock ${expanded ? 'is-expanded' : ''}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className={`cure-dock ${expanded ? 'is-expanded' : ''} ${
+        wide ? 'is-wide' : ''
+      }`}
+      onMouseLeave={() => {
+        setHovered(false)
+        setDismissed(false)
+      }}
     >
       <style>{`
         .cure-dock {
@@ -154,25 +191,27 @@ function FloatingDock() {
         .cure-dock-menu {
           display: flex;
           flex-direction: column;
-          gap: 6px;
           width: 58px;
+          max-height: calc(100dvh - 115px);
           padding: 8px;
-          overflow: hidden;
-          border: 1px solid rgba(255,255,255,.75);
-          border-radius: 30px;
-          background: rgba(251,249,242,.91);
-          box-shadow:
-            0 16px 42px rgba(23,59,55,.14),
+          overflow-x: hidden;
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: #c6d4c8 transparent;
+          border: 1px solid rgba(255,255,255,.78);
+          border-radius: 29px;
+          background: rgba(251,249,242,.95);
+          box-shadow: 0 16px 42px rgba(23,59,55,.14),
             inset 0 1px 0 rgba(255,255,255,.9);
           backdrop-filter: blur(18px);
           -webkit-backdrop-filter: blur(18px);
           opacity: 0;
-          transform: translateY(18px) scale(.92);
+          transform: translateY(12px) scale(.96);
           transform-origin: bottom left;
           pointer-events: none;
-          transition:
-            opacity .24s ease,
-            transform .3s cubic-bezier(.2,.8,.2,1);
+          transition: width .28s cubic-bezier(.2,.8,.2,1),
+            opacity .2s ease,
+            transform .28s cubic-bezier(.2,.8,.2,1);
         }
 
         .cure-dock.is-expanded .cure-dock-menu {
@@ -181,40 +220,96 @@ function FloatingDock() {
           pointer-events: auto;
         }
 
+        .cure-dock.is-wide .cure-dock-menu {
+          width: 232px;
+          padding: 12px;
+          border-radius: 22px;
+        }
+
+        .cure-dock-group + .cure-dock-group {
+          margin-top: 8px;
+          padding-top: 9px;
+          border-top: 1px solid #e7e9df;
+        }
+
+        .cure-dock-heading {
+          display: none;
+          margin: 0 0 7px;
+          padding: 0 9px;
+          color: #84948a;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 1.5px;
+          line-height: 1.5;
+          white-space: nowrap;
+        }
+
+        .cure-dock.is-wide .cure-dock-heading {
+          display: block;
+        }
+
         .cure-dock-link {
           position: relative;
           display: flex;
-          flex: 0 0 42px;
           align-items: center;
-          justify-content: center;
+          flex: 0 0 42px;
+          gap: 12px;
           width: 42px;
           height: 42px;
-          border-radius: 50%;
+          margin-bottom: 4px;
+          padding: 0;
+          overflow: visible;
+          border-radius: 14px;
           color: #698077;
           text-decoration: none;
-          transition:
-            color .2s ease,
-            background .2s ease,
-            transform .2s ease;
+          white-space: nowrap;
+          transition: width .28s ease, color .2s ease,
+            background .2s ease, transform .2s ease;
+        }
+
+        .cure-dock.is-wide .cure-dock-link {
+          width: 100%;
+          padding: 0 11px;
+          margin-bottom: 3px;
         }
 
         .cure-dock-link:hover {
           color: var(--dock-green);
           background: #eaf0e7;
-          transform: scale(1.07);
         }
 
         .cure-dock-link.active {
           color: white;
           background: var(--dock-green);
-          box-shadow: 0 5px 13px rgba(36,94,82,.2);
+          box-shadow: 0 5px 13px rgba(36,94,82,.17);
+        }
+
+        .cure-dock-link svg {
+          flex: 0 0 19px;
+          margin-left: 11px;
+        }
+
+        .cure-dock.is-wide .cure-dock-link svg {
+          margin-left: 0;
+        }
+
+        .cure-dock-label {
+          display: none;
+          overflow: hidden;
+          font-size: 12px;
+          font-weight: 650;
+          text-overflow: ellipsis;
+        }
+
+        .cure-dock.is-wide .cure-dock-label {
+          display: block;
         }
 
         .cure-dock-tooltip {
           position: absolute;
           left: 51px;
           top: 50%;
-          z-index: 2;
+          z-index: 3;
           padding: 8px 12px;
           border: 1px solid #e7e9df;
           border-radius: 9px;
@@ -230,15 +325,86 @@ function FloatingDock() {
           transition: opacity .16s ease, transform .16s ease;
         }
 
-        .cure-dock-link:hover .cure-dock-tooltip,
-        .cure-dock-link:focus-visible .cure-dock-tooltip {
+        .cure-dock:not(.is-wide) .cure-dock-link:hover .cure-dock-tooltip,
+        .cure-dock:not(.is-wide) .cure-dock-link:focus-visible .cure-dock-tooltip {
           opacity: 1;
           transform: translate(0,-50%);
         }
 
+        .cure-dock-tools {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 8px;
+          padding: 0 2px 10px;
+          border-bottom: 1px solid #e7e9df;
+        }
+
+        .cure-dock-brand {
+          display: none;
+          color: var(--dock-ink);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: -.3px;
+        }
+
+        .cure-dock-brand span {
+          color: #6b8c77;
+          font-weight: 500;
+        }
+
+        .cure-dock.is-wide .cure-dock-tools {
+          justify-content: space-between;
+        }
+
+        .cure-dock.is-wide .cure-dock-brand {
+          display: block;
+        }
+
+        .cure-dock-brand {
+          color: var(--dock-ink);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: -.3px;
+        }
+
+        .cure-dock-brand span {
+          color: #6b8c77;
+          font-weight: 500;
+        }
+
+        .cure-dock-expand {
+          display: grid;
+          flex: 0 0 30px;
+          place-items: center;
+          width: 30px;
+          height: 30px;
+          border: 1px solid #e3e8df;
+          border-radius: 9px;
+          background: #fffefa;
+          color: var(--dock-green);
+          cursor: pointer;
+          transition: background .2s ease, transform .2s ease;
+        }
+
+        .cure-dock-expand:hover {
+          background: #eaf0e7;
+          transform: scale(1.04);
+        }
+
+        .cure-dock-expand:focus-visible,
+        .cure-dock-trigger:focus-visible,
+        .cure-dock-link:focus-visible {
+          outline: 3px solid #91b8a0;
+          outline-offset: 3px;
+        }
+
         .cure-dock-trigger {
+          position: relative;
           display: grid;
           place-items: center;
+          flex: 0 0 58px;
           width: 58px;
           height: 58px;
           border: 1px solid rgba(255,255,255,.6);
@@ -246,12 +412,9 @@ function FloatingDock() {
           background: var(--dock-green);
           color: white;
           cursor: pointer;
-          box-shadow:
-            0 8px 24px rgba(23,59,55,.22),
+          box-shadow: 0 8px 24px rgba(23,59,55,.22),
             inset 0 1px 0 rgba(255,255,255,.18);
-          transition:
-            background .25s ease,
-            box-shadow .25s ease,
+          transition: background .25s ease, box-shadow .25s ease,
             transform .3s cubic-bezier(.2,.8,.2,1);
         }
 
@@ -272,12 +435,6 @@ function FloatingDock() {
           transform: rotate(45deg) scale(1.04);
         }
 
-        .cure-dock-trigger:focus-visible,
-        .cure-dock-link:focus-visible {
-          outline: 3px solid #91b8a0;
-          outline-offset: 3px;
-        }
-
         .cure-dock-pin {
           position: absolute;
           top: 1px;
@@ -289,6 +446,17 @@ function FloatingDock() {
           background: #d8e8b7;
         }
 
+        @media (max-width: 480px) {
+          .cure-dock {
+            left: 14px;
+            bottom: 16px;
+          }
+
+          .cure-dock.is-wide .cure-dock-menu {
+            width: min(232px, calc(100vw - 82px));
+          }
+        }
+
         @media (max-height: 620px) {
           .cure-dock {
             bottom: 14px;
@@ -296,23 +464,18 @@ function FloatingDock() {
           }
 
           .cure-dock-menu {
-            gap: 2px;
-            padding: 5px;
+            max-height: calc(100dvh - 90px);
           }
 
           .cure-dock-link {
-            flex-basis: 34px;
-            width: 34px;
-            height: 34px;
+            flex-basis: 36px;
+            height: 36px;
           }
 
           .cure-dock-trigger {
+            flex-basis: 48px;
             width: 48px;
             height: 48px;
-          }
-
-          .cure-dock-menu {
-            width: 48px;
           }
         }
 
@@ -320,6 +483,7 @@ function FloatingDock() {
           .cure-dock-menu,
           .cure-dock-link,
           .cure-dock-trigger,
+          .cure-dock-expand,
           .cure-dock-tooltip {
             transition: none;
           }
@@ -330,35 +494,65 @@ function FloatingDock() {
         className="cure-dock-menu"
         aria-label="CureAI navigation"
         aria-hidden={!expanded}
+        inert={!expanded}
       >
-        {navigation.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            tabIndex={expanded ? 0 : -1}
-            className={({ isActive }) =>
-              `cure-dock-link ${isActive ? 'active' : ''}`
-            }
-            aria-label={item.label}
-            onClick={() => {
-              setPinned(false)
-              setHovered(false)
-            }}
+        <div className="cure-dock-tools">
+          <div className="cure-dock-brand">
+            Cure<span>AI</span>
+          </div>
+
+          <button
+            type="button"
+            className="cure-dock-expand"
+            onClick={() => setWide((current) => !current)}
+            aria-label={wide ? 'Collapse sidebar labels' : 'Expand sidebar labels'}
+            aria-pressed={wide}
+            title={wide ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <DockIcon name={item.icon} />
-            <span className="cure-dock-tooltip">{item.label}</span>
-          </NavLink>
+            <DockIcon name={wide ? 'collapse' : 'expand'} size={17} />
+          </button>
+        </div>
+
+        {groups.map((group) => (
+          <section className="cure-dock-group" key={group.title}>
+            <h2 className="cure-dock-heading">{group.title}</h2>
+
+            {group.items.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/'}
+                tabIndex={expanded ? 0 : -1}
+                className={({ isActive }) =>
+                  `cure-dock-link ${isActive ? 'active' : ''}`
+                }
+                aria-label={item.label}
+                title={wide ? undefined : item.label}
+                onClick={() => {
+                  setPinned(false)
+                  setHovered(false)
+                  setDismissed(false)
+                }}
+              >
+                <DockIcon name={item.icon} />
+                <span className="cure-dock-label">{item.label}</span>
+                <span className="cure-dock-tooltip">{item.label}</span>
+              </NavLink>
+            ))}
+          </section>
         ))}
       </nav>
 
       <button
         type="button"
         className="cure-dock-trigger"
-        onClick={() => setPinned((current) => !current)}
-        aria-label={pinned ? 'Unlock and collapse navigation' : 'Keep navigation expanded'}
+        onMouseEnter={() => {
+          if (!pinned && !dismissed) setHovered(true)
+        }}
+        onClick={handleTriggerClick}
+        aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'}
         aria-expanded={expanded}
-        title={pinned ? 'Unlock navigation' : 'Pin navigation open'}
+        title={expanded ? 'Collapse navigation' : 'Open navigation'}
       >
         <DockIcon name={expanded ? 'close' : 'menu'} size={25} />
         {pinned && <span className="cure-dock-pin" />}

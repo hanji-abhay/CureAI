@@ -162,10 +162,12 @@ function Navbar() {
           <a href="#how-it-works">How it works</a>
           <a href="#about">Our approach</a>
         </div>
-
-        <a className="cure-button cure-button-primary cure-nav-cta" href="#assessments">
+        <Link
+          className="cure-button cure-button-primary cure-nav-cta"
+          to="/register"
+        >
           Get started <span aria-hidden="true">↗</span>
-        </a>
+        </Link>
       </nav>
     </header>
   )

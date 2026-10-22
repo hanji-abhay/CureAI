@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_BASE_URL
+
 function ResetPassword() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
@@ -10,14 +12,66 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const passwordsMatch =
     confirmPassword.length === 0 || password === confirmPassword
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setSubmitted(true)
+    setMessage('')
+    setError('')
+
+    if (!token) {
+      setError('This reset link is missing its token. Please request a new link.')
+      return
+    }
+
+    if (password.length < 8) {
+      setError('Your password must contain at least 8 characters.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Your passwords do not match.')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token, password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Unable to reset your password.')
+      }
+
+      setIsSuccess(true)
+      setMessage(
+        data.message || 'Your password has been reset. You can now sign in.'
+      )
+      setPassword('')
+      setConfirmPassword('')
+    } catch (err) {
+      setError(
+        err.message === 'Failed to fetch'
+          ? 'Unable to connect to CureAI. Please check that the backend is running and try again.'
+          : err.message || 'Something went wrong. Please request a new reset link.'
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -62,17 +116,21 @@ function ResetPassword() {
         .cr-field input { width: 100%; padding: 14px; padding-right: 70px; border: 1px solid #e0e5db; border-radius: 10px; outline: none; background: #fffefa; color: var(--cr-ink); font: inherit; font-size: 12px; transition: border-color .2s, box-shadow .2s; }
         .cr-field input:focus { border-color: #79a18a; box-shadow: 0 0 0 3px #4678591a; }
         .cr-field input::placeholder { color: #a0aaa1; }
+        .cr-field input:disabled { opacity: .65; cursor: not-allowed; }
         .cr-toggle { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); border: 0; background: transparent; color: var(--cr-green); cursor: pointer; font-size: 10px; font-weight: 750; }
         .cr-hint { margin: -10px 0 18px; color: #8a968d; font-size: 10px; line-height: 1.7; }
-        .cr-error { margin: -10px 0 18px; color: #b44747; font-size: 10px; }
+        .cr-error { margin: 0 0 18px; color: #b44747; font-size: 11px; line-height: 1.7; }
         .cr-submit { width: 100%; margin-top: 2px; padding: 14px; border: 0; border-radius: 10px; background: var(--cr-green); color: white; cursor: pointer; font: inherit; font-size: 12px; font-weight: 750; transition: background .2s, transform .2s; }
-        .cr-submit:hover { background: #194a40; transform: translateY(-1px); }
-        .cr-message { margin-top: 18px; padding: 14px; border: 1px solid #dce8d8; border-radius: 10px; background: #f1f6ed; color: #42674c; font-size: 11px; line-height: 1.8; }
+        .cr-submit:hover:not(:disabled) { background: #194a40; transform: translateY(-1px); }
+        .cr-submit:disabled { opacity: .65; cursor: not-allowed; }
+        .cr-message { margin-top: 18px; padding: 14px; border: 1px solid #dce8d8; border-radius: 10px; background: #f1f6ed; color: #42674c; font-size: 11px; line-height: 1.8; overflow-wrap: anywhere; }
         .cr-message strong { display: block; margin-bottom: 4px; }
+        .cr-message-error { border-color: #f0d8d5; background: #fff2f0; color: #9b3939; }
         .cr-back { display: block; margin-top: 22px; color: var(--cr-green); font-size: 11px; font-weight: 750; text-align: center; text-decoration: none; }
         .cr-back:hover { text-decoration: underline; }
         .cr-divider { height: 1px; margin: 24px 0 18px; background: #edf0e9; }
         .cr-help { margin: 0; color: #89958c; font-size: 10px; line-height: 1.8; text-align: center; }
+        .cr-help a { color: var(--cr-green); font-weight: 700; }
         .cr-footer { display: flex; justify-content: center; padding: 20px; color: #8b978e; font-size: 10px; text-align: center; }
         @media (max-width: 480px) {
           .cr-header { padding: 16px 18px; }
@@ -100,111 +158,130 @@ function ResetPassword() {
           <div className="cr-icon" aria-hidden="true">⌑</div>
 
           <div className="cr-eyebrow">ACCOUNT SECURITY</div>
-          <h1>Create a new password</h1>
+          <h1>{isSuccess ? 'Password updated' : 'Create a new password'}</h1>
           <p className="cr-description">
-            Choose a strong password you haven't used before. Confirm it
-            below to make sure everything matches.
+            {isSuccess
+              ? 'Your new password is ready to use. Sign in with it to continue to CureAI.'
+              : "Choose a strong password you haven't used before. Confirm it below to make sure everything matches."}
           </p>
 
-          <form onSubmit={handleSubmit}>
-            <div className="cr-field">
-              <label htmlFor="new-password">New password</label>
-              <div className="cr-input-wrap">
-                <input
-                  id="new-password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder="At least 8 characters"
-                  minLength={8}
-                  value={password}
-                  onChange={(event) => {
-                    setPassword(event.target.value)
-                    setSubmitted(false)
-                  }}
-                  required
-                />
-                <button
-                  className="cr-toggle"
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'HIDE' : 'SHOW'}
-                </button>
-              </div>
-            </div>
-
-            <p className="cr-hint">
-              Use at least 8 characters. A longer, unique password is better.
-            </p>
-
-            <div className="cr-field">
-              <label htmlFor="confirm-password">Confirm new password</label>
-              <div className="cr-input-wrap">
-                <input
-                  id="confirm-password"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder="Enter your new password again"
-                  minLength={8}
-                  value={confirmPassword}
-                  onChange={(event) => {
-                    setConfirmPassword(event.target.value)
-                    setSubmitted(false)
-                  }}
-                  required
-                />
-                <button
-                  className="cr-toggle"
-                  type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
-                  aria-label={
-                    showConfirmPassword
-                      ? 'Hide confirmation'
-                      : 'Show confirmation'
-                  }
-                >
-                  {showConfirmPassword ? 'HIDE' : 'SHOW'}
-                </button>
-              </div>
-            </div>
-
-            {!passwordsMatch && (
-              <p className="cr-error" role="alert">
-                Your passwords do not match yet.
-              </p>
-            )}
-
-            <button className="cr-submit" type="submit">
-              Reset password&nbsp; ↗
-            </button>
-          </form>
-
-          {submitted && (
-            <div className="cr-message" role="status">
-              <strong>Validation complete, preview only</strong>
-              {token
-                ? 'Your form passed the basic checks. The reset token has not been verified by a backend, and your password has not been changed.'
-                : 'Your form passed the basic checks, but this page has no reset token. Opened directly, it cannot verify your identity or change your password.'}
-              {' '}Password reset will work after secure backend verification is implemented.
+          {!token && !isSuccess && (
+            <div className="cr-message cr-message-error" role="alert">
+              <strong>Reset link missing</strong>
+              This page needs a valid reset link. Request a new one to continue.
             </div>
           )}
 
-          <Link to="/forgot-password" className="cr-back">
-            ← Request a new reset link
+          {!isSuccess && (
+            <form onSubmit={handleSubmit}>
+              <div className="cr-field">
+                <label htmlFor="new-password">New password</label>
+                <div className="cr-input-wrap">
+                  <input
+                    id="new-password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    placeholder="At least 8 characters"
+                    minLength={8}
+                    maxLength={128}
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value)
+                      setError('')
+                    }}
+                    required
+                    disabled={!token || isSubmitting}
+                  />
+                  <button
+                    className="cr-toggle"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? 'HIDE' : 'SHOW'}
+                  </button>
+                </div>
+              </div>
+
+              <p className="cr-hint">
+                Use at least 8 characters. A longer, unique password is better.
+              </p>
+
+              <div className="cr-field">
+                <label htmlFor="confirm-password">Confirm new password</label>
+                <div className="cr-input-wrap">
+                  <input
+                    id="confirm-password"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    placeholder="Enter your new password again"
+                    minLength={8}
+                    maxLength={128}
+                    value={confirmPassword}
+                    onChange={(event) => {
+                      setConfirmPassword(event.target.value)
+                      setError('')
+                    }}
+                    required
+                    disabled={!token || isSubmitting}
+                  />
+                  <button
+                    className="cr-toggle"
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={
+                      showConfirmPassword ? 'Hide confirmation' : 'Show confirmation'
+                    }
+                    disabled={isSubmitting}
+                  >
+                    {showConfirmPassword ? 'HIDE' : 'SHOW'}
+                  </button>
+                </div>
+              </div>
+
+              {!passwordsMatch && (
+                <p className="cr-error" role="alert">
+                  Your passwords do not match yet.
+                </p>
+              )}
+
+              {error && (
+                <p className="cr-error" role="alert">
+                  {error}
+                </p>
+              )}
+
+              <button
+                className="cr-submit"
+                type="submit"
+                disabled={!token || isSubmitting || !passwordsMatch}
+              >
+                {isSubmitting ? 'Updating password...' : 'Reset password ↗'}
+              </button>
+            </form>
+          )}
+
+          {message && (
+            <div className="cr-message" role="status">
+              <strong>{isSuccess ? 'Success!' : 'Notice'}</strong>
+              {message}
+            </div>
+          )}
+
+          <Link to={isSuccess ? '/login' : '/forgot-password'} className="cr-back">
+            {isSuccess ? '← Sign in to CureAI' : '← Request a new reset link'}
           </Link>
 
           <div className="cr-divider" />
 
           <p className="cr-help">
-            Already remember your password? <Link to="/login">Sign in</Link>
+            Need to return to your account? <Link to="/login">Sign in</Link>
             <br />
             <br />
-            CureAI preview · No password is saved or changed on this page.
+            CureAI · Intelligence for Wellness
           </p>
         </section>
       </main>

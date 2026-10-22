@@ -16,6 +16,7 @@
   --cure-sage: #e6ece0;
   --cure-muted: #63756c;
   --cure-border: #dce2d7;
+  --cure-ice-blue: linear-gradient(115deg, #4b87be, #319497, #90c3e6);
 
   min-height: 100vh;
   overflow: clip;
@@ -52,7 +53,7 @@
 .cure-header {
   position: relative;
   z-index: 5;
-  background: var(--cure-ivory);
+  background: var(--cure-ice-blue);
 }
 
 .cure-navbar {
@@ -1131,7 +1132,7 @@
    MOBILE
 ========================================= */
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .cure-navbar,
   .cure-hero,
   .cure-footer {
@@ -1389,6 +1390,7 @@
 
   .cure-button {
     width: 100%;
+    max-width: 320px;
   }
 
   .cure-hero-art {
@@ -1503,3 +1505,526 @@
     transition: none !important;
   }
 }
+
+
+/* =========================================
+   CUREAI | CONSOLIDATED VISUAL THEME
+   Forest green · Ice blue · Midnight indigo
+========================================= */
+
+.cure-home {
+  --cure-ink: #17352e;
+  --cure-deep: #153f3a;
+  --cure-deeper: #0c2c28;
+  --cure-teal: #28665b;
+  --cure-teal-hover: #194e45;
+  --cure-mint: #b8e9d6;
+  --cure-ivory: #c8d9ce;
+  --cure-paper: #c9e0df;
+  --cure-sage: #b8cdbd;
+  --cure-muted: #425f57;
+  --cure-border: #a7c3b7;
+
+  /* Header-only palette */
+  --cure-header-deep: #191b3b;
+  --cure-header-mid: #292b55;
+  --cure-lavender: #c6b9ff;
+  --cure-cyan: #bceeff;
+
+  background:
+    radial-gradient(
+      ellipse at 85% 18%,
+      rgb(221 244 255 / 25%),
+      transparent 35%
+    ),
+    linear-gradient(145deg, #c8d9ce, #b8cdbd 58%, #c4d9df);
+}
+
+/* =========================================
+   HEADER | MIDNIGHT INDIGO + LAVENDER
+========================================= */
+
+.cure-header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 78% 0%,
+      rgb(139 130 218 / 22%),
+      transparent 43%
+    ),
+    linear-gradient(
+      115deg,
+      var(--cure-header-deep) 0%,
+      var(--cure-header-mid) 58%,
+      #303e68 100%
+    );
+}
+
+.cure-header::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -70px;
+  bottom: -115px;
+  width: 250px;
+  height: 170px;
+  border: 1px solid rgb(198 185 255 / 18%);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 24px rgb(198 185 255 / 4%),
+    0 0 0 50px rgb(188 238 255 / 3%);
+  pointer-events: none;
+}
+
+.cure-navbar {
+  position: relative;
+  z-index: 1;
+  border-bottom-color: rgb(221 244 255 / 15%);
+}
+
+.cure-brand,
+.cure-brand-name {
+  color: #f4f4ff;
+}
+
+.cure-brand-symbol,
+.cure-brand-name span {
+  color: var(--cure-cyan);
+}
+
+.cure-brand-tagline {
+  color: #c6c8e7;
+}
+
+.cure-nav-links a {
+  color: #d9dcf4;
+}
+
+.cure-nav-links a:hover {
+  color: var(--cure-cyan);
+}
+
+.cure-nav-links a::after {
+  background: linear-gradient(
+    90deg,
+    var(--cure-lavender),
+    var(--cure-cyan)
+  );
+}
+
+.cure-nav-cta.cure-button-primary {
+  color: #171b3b !important;
+  background: linear-gradient(120deg, #d6ceff, #bceeff);
+  box-shadow: 0 7px 22px rgb(7 10 35 / 20%);
+}
+
+.cure-nav-cta.cure-button-primary:hover {
+  background: linear-gradient(120deg, #e2dcff, #d1f5ff);
+}
+
+.cure-button-outline {
+  border-color: rgb(40 102 91 / 36%);
+  color: #173f38;
+  background: rgb(221 244 255 / 30%);
+  backdrop-filter: blur(12px);
+}
+
+.cure-button-outline:hover {
+  border-color: var(--cure-teal);
+  background: rgb(221 244 255 / 58%);
+}
+
+/* =========================================
+   HERO | DEEP FOREST GREEN
+========================================= */
+
+.cure-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.cure-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc((min(1240px, 100vw - 88px) - 100vw) / 2);
+  background:
+    radial-gradient(
+      ellipse at 84% 35%,
+      rgb(107 183 173 / 28%),
+      transparent 38%
+    ),
+    linear-gradient(
+      125deg,
+      #153f3a 0%,
+      #1b5048 54%,
+      #28665b 100%
+    );
+}
+
+.cure-hero h1 {
+  color: #f3f6ed;
+}
+
+.cure-hero h1 span {
+  color: var(--cure-cyan);
+}
+
+.cure-hero .cure-eyebrow {
+  color: var(--cure-mint);
+}
+
+.cure-hero .cure-eyebrow-dot {
+  background: var(--cure-mint);
+  box-shadow: 0 0 0 4px rgb(188 239 224 / 16%);
+}
+
+.cure-hero-description {
+  color: #d0e3dc;
+}
+
+.cure-trust-note > span {
+  border-color: rgb(221 244 255 / 24%);
+  color: var(--cure-cyan);
+  background: rgb(221 244 255 / 10%);
+}
+
+.cure-trust-note p {
+  color: #c6ded5;
+}
+
+/* =========================================
+   HERO ART | ICE GLASS
+========================================= */
+
+.cure-hero-art {
+  border-color: rgb(221 244 255 / 55%);
+  background:
+    radial-gradient(
+      ellipse at 52% 42%,
+      rgb(221 244 255 / 96%) 0%,
+      rgb(176 222 224 / 91%) 42%,
+      rgb(79 139 129 / 88%) 100%
+    );
+  box-shadow:
+    inset 0 0 55px rgb(221 244 255 / 35%),
+    0 22px 55px rgb(5 34 30 / 20%);
+}
+
+.cure-art-glow {
+  background: rgb(221 244 255 / 65%);
+  filter: blur(44px);
+}
+
+.cure-art-ring {
+  border-color: rgb(21 76 68 / 25%);
+}
+
+.cure-art-orbit-label {
+  color: #214f49;
+}
+
+.cure-art-orbit-label span:nth-child(2) {
+  color: var(--cure-teal);
+}
+
+.cure-art-heart {
+  color: var(--cure-teal);
+}
+
+.cure-art-chip {
+  border-color: rgb(221 244 255 / 80%);
+  background: rgb(221 244 255 / 76%);
+  box-shadow: 0 12px 30px rgb(12 44 40 / 17%);
+  backdrop-filter: blur(18px);
+}
+
+.cure-chip-icon {
+  color: #174e45;
+  background: rgb(184 205 189 / 85%);
+}
+
+.cure-art-chip strong {
+  color: #17352e;
+}
+
+.cure-art-chip small,
+.cure-art-caption {
+  color: #355c54;
+}
+
+.cure-art-caption > span {
+  background: var(--cure-teal);
+}
+
+/* =========================================
+   ASSESSMENTS | SAGE + ICE BLUE GLASS
+========================================= */
+
+.cure-assessments {
+  background:
+    radial-gradient(
+      ellipse at 8% 10%,
+      rgb(221 244 255 / 58%),
+      transparent 35%
+    ),
+    linear-gradient(
+      145deg,
+      #b8cdbd 0%,
+      #c9e0df 53%,
+      #b4cec5 100%
+    );
+}
+
+.cure-section-intro h2,
+.cure-how-heading h2 {
+  color: var(--cure-deep);
+}
+
+.cure-section-intro h2 span {
+  color: var(--cure-teal);
+}
+
+.cure-section-intro > p {
+  color: var(--cure-muted);
+}
+
+.cure-assessment-card {
+  border-color: rgb(255 255 255 / 60%);
+  background: rgb(221 244 255 / 43%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 48%),
+    0 9px 25px rgb(21 63 58 / 5%);
+  backdrop-filter: blur(14px);
+}
+
+.cure-assessment-card:hover {
+  border-color: rgb(40 102 91 / 55%);
+  background: rgb(221 244 255 / 70%);
+  box-shadow: 0 18px 36px rgb(21 63 58 / 12%);
+}
+
+.cure-assessment-card h3 {
+  color: #173f38;
+}
+
+.cure-assessment-card > p {
+  color: var(--cure-muted);
+}
+
+.cure-assessment-number {
+  color: #58746b;
+}
+
+.cure-assessment-link {
+  border-top-color: rgb(40 102 91 / 20%);
+}
+
+.cure-disclaimer {
+  border-left-color: var(--cure-teal);
+  color: var(--cure-muted);
+}
+
+/* Distinct colours for the four assessment categories */
+
+.cure-card-lavender {
+  --card-accent: #7864aa;
+  --card-tint: #d7d1eb;
+}
+
+.cure-card-peach {
+  --card-accent: #a9603e;
+  --card-tint: #ecd5c4;
+}
+
+.cure-card-blue {
+  --card-accent: #386e94;
+  --card-tint: #c4e7f2;
+}
+
+.cure-card-pink {
+  --card-accent: #985572;
+  --card-tint: #ebd0dd;
+}
+
+/* =========================================
+   HOW IT WORKS | DEEP GREEN + CYAN
+========================================= */
+
+.cure-how {
+  background:
+    radial-gradient(
+      ellipse at 90% 0%,
+      rgb(111 187 171 / 23%),
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 0% 100%,
+      rgb(40 102 91 / 30%),
+      transparent 45%
+    ),
+    linear-gradient(
+      135deg,
+      #153f3a 0%,
+      #10342f 55%,
+      #0c2c28 100%
+    );
+}
+
+.cure-how .cure-eyebrow,
+.cure-how-heading h2 span {
+  color: var(--cure-cyan);
+}
+
+.cure-how .cure-eyebrow-dot {
+  background: var(--cure-cyan);
+  box-shadow: 0 0 0 4px rgb(188 238 255 / 14%);
+}
+
+.cure-step {
+  border-color: rgb(221 244 255 / 19%);
+  background: rgb(221 244 255 / 7%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+  backdrop-filter: blur(12px);
+}
+
+.cure-step:hover {
+  border-color: rgb(189 238 255 / 48%);
+  background: rgb(221 244 255 / 12%);
+}
+
+.cure-step-number,
+.cure-step-icon {
+  color: var(--cure-cyan);
+}
+
+.cure-step-icon {
+  border-color: rgb(189 238 255 / 26%);
+  background: rgb(189 238 255 / 9%);
+}
+
+.cure-step h3 {
+  color: #f2f7f0;
+}
+
+.cure-step p,
+.cure-how-heading > p {
+  color: #c7ddd6;
+}
+
+/* =========================================
+   RESPONSIBLE AI | SAGE + ICE BLUE
+========================================= */
+
+.cure-safety {
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgb(221 244 255 / 70%),
+      transparent 48%
+    ),
+    linear-gradient(
+      125deg,
+      #b8cdbd 0%,
+      #c9e0df 60%,
+      #b9d4d5 100%
+    );
+}
+
+.cure-safety-decoration {
+  color: #83b8b0;
+  opacity: 0.34;
+}
+
+.cure-safety-icon {
+  border-color: rgb(255 255 255 / 60%);
+  color: #20594f;
+  background: rgb(221 244 255 / 55%);
+}
+
+.cure-safety-label,
+.cure-safety-signoff {
+  color: #20594f;
+}
+
+.cure-safety h2 {
+  color: var(--cure-deep);
+}
+
+.cure-safety-copy p {
+  color: var(--cure-muted);
+}
+
+/* =========================================
+   FOOTER | FOREST GREEN
+========================================= */
+
+.cure-footer {
+  width: 100%;
+  padding: 27px max(44px, calc((100% - 1240px) / 2));
+  color: #f1f7ee;
+  background: linear-gradient(115deg, #153f3a, #1d5148);
+}
+
+.cure-brand-footer,
+.cure-brand-footer .cure-brand-name {
+  color: #f1f7ee;
+}
+
+.cure-brand-footer .cure-brand-symbol,
+.cure-brand-footer .cure-brand-name span {
+  color: var(--cure-cyan);
+}
+
+.cure-brand-footer .cure-brand-tagline,
+.cure-footer > p {
+  color: #c5ddd5;
+}
+
+.cure-footer-links a {
+  color: #d4e8e1;
+}
+
+.cure-footer-links a:hover {
+  color: var(--cure-cyan);
+}
+
+/* =========================================
+   ACCESSIBILITY + RESPONSIVE COLOUR FIXES
+========================================= */
+
+.cure-home a:focus-visible,
+.cure-home button:focus-visible {
+  outline: 3px solid #6bcce8;
+  outline-offset: 4px;
+}
+
+@media (max-width: 1050px) {
+  .cure-hero::before {
+    inset-inline: -28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .cure-hero::before {
+    inset-inline: -18px;
+  }
+
+  .cure-footer {
+    padding: 26px 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .cure-hero::before {
+    inset-inline: -15px;
+  }
+
+  .cure-footer {
+    padding-inline: 15px;
+  }
+}
+
+
