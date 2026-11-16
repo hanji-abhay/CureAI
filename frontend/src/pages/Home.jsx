@@ -1,79 +1,78 @@
-
-import { Link } from 'react-router-dom'
-import '../App.css'
+import { Link } from "react-router-dom";
+import "../App.css";
 
 const assessments = [
   {
-    id: 'thyroid',
-    number: '01',
-    title: 'Thyroid',
+    id: "thyroid",
+    number: "01",
+    title: "Thyroid",
     description:
-      'Explore thyroid-related health indicators and potential risk factors.',
-    icon: '◈',
-    color: 'lavender',
-    status: 'ENDOCRINE HEALTH',
+      "Explore thyroid-related health indicators and potential risk factors.",
+    icon: "◈",
+    color: "lavender",
+    status: "ENDOCRINE HEALTH",
   },
   {
-    id: 'skin',
-    number: '02',
-    title: 'Skin',
+    id: "skin",
+    number: "02",
+    title: "Skin",
     description:
-      'Explore skin-lesion characteristics and relevant personal risk factors.',
-    icon: '✳',
-    color: 'peach',
-    status: 'DERMATOLOGICAL HEALTH',
+      "Explore skin-lesion characteristics and relevant personal risk factors.",
+    icon: "✳",
+    color: "peach",
+    status: "DERMATOLOGICAL HEALTH",
   },
   {
-    id: 'lung',
-    number: '03',
-    title: 'Lung',
+    id: "lung",
+    number: "03",
+    title: "Lung",
     description:
-      'Review respiratory indicators, lifestyle factors, and reported symptoms.',
-    icon: '⌁',
-    color: 'blue',
-    status: 'RESPIRATORY HEALTH',
+      "Review respiratory indicators, lifestyle factors, and reported symptoms.",
+    icon: "⌁",
+    color: "blue",
+    status: "RESPIRATORY HEALTH",
   },
   {
-    id: 'breast',
-    number: '04',
-    title: 'Breast',
+    id: "breast",
+    number: "04",
+    title: "Breast",
     description:
-      'Explore relevant breast-health indicators and personal health information.',
-    icon: '♡',
-    color: 'pink',
-    status: 'BREAST HEALTH',
+      "Explore relevant breast-health indicators and personal health information.",
+    icon: "♡",
+    color: "pink",
+    status: "BREAST HEALTH",
   },
-]
+];
 
 const steps = [
   {
-    number: '01',
-    title: 'Share your information',
+    number: "01",
+    title: "Share your information",
     description:
-      'Complete a structured questionnaire with relevant health details.',
-    icon: '↗',
+      "Complete a structured questionnaire with relevant health details.",
+    icon: "↗",
   },
   {
-    number: '02',
-    title: 'AI-assisted analysis',
+    number: "02",
+    title: "AI-assisted analysis",
     description:
-      'Your information is processed by the assessment model configured for the selected experience.',
-    icon: '✳',
+      "Your information is processed by the assessment model configured for the selected experience.",
+    icon: "✳",
   },
   {
-    number: '03',
-    title: 'Explore your results',
+    number: "03",
+    title: "Explore your results",
     description:
-      'Review the available output, understand its limitations, and consider appropriate next steps.',
-    icon: '↗',
+      "Review the available output, understand its limitations, and consider appropriate next steps.",
+    icon: "↗",
   },
-]
+];
 
 function CureAILogo({ footer = false }) {
   return (
     <Link
       to="/"
-      className={`cure-brand ${footer ? 'cure-brand-footer' : ''}`}
+      className={`cure-brand ${footer ? "cure-brand-footer" : ""}`}
       aria-label="CureAI home"
     >
       <svg
@@ -143,12 +142,10 @@ function CureAILogo({ footer = false }) {
         <span className="cure-brand-name">
           Cure<span>AI</span>
         </span>
-        <span className="cure-brand-tagline">
-          INTELLIGENCE FOR WELLNESS
-        </span>
+        <span className="cure-brand-tagline">INTELLIGENCE FOR WELLNESS</span>
       </span>
     </Link>
-  )
+  );
 }
 
 function Navbar() {
@@ -170,7 +167,7 @@ function Navbar() {
         </Link>
       </nav>
     </header>
-  )
+  );
 }
 
 function Hero() {
@@ -189,9 +186,9 @@ function Hero() {
         </h1>
 
         <p className="cure-hero-description">
-          Explore AI-assisted health assessments designed to help you
-          understand health indicators, explore potential risks, and make
-          more informed decisions about your wellbeing.
+          Explore AI-assisted health assessments designed to help you understand
+          health indicators, explore potential risks, and make more informed
+          decisions about your wellbeing.
         </p>
 
         <div className="cure-hero-actions">
@@ -210,7 +207,10 @@ function Hero() {
         </div>
       </div>
 
-      <div className="cure-hero-art" aria-label="CureAI health and technology illustration">
+      <div
+        className="cure-hero-art"
+        aria-label="CureAI health and technology illustration"
+      >
         <div className="cure-art-glow" />
         <div className="cure-art-ring cure-art-ring-one" />
         <div className="cure-art-ring cure-art-ring-two" />
@@ -262,12 +262,11 @@ function Hero() {
         </div>
 
         <div className="cure-art-caption">
-          <span />
-          A thoughtful approach to health technology
+          <span />A thoughtful approach to health technology
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function AssessmentCard({ assessment }) {
@@ -294,7 +293,7 @@ function AssessmentCard({ assessment }) {
         {assessment.icon}
       </span>
     </Link>
-  )
+  );
 }
 
 function Assessments() {
@@ -325,11 +324,11 @@ function Assessments() {
       </div>
 
       <p className="cure-disclaimer">
-        Educational and informational use only. These assessments do not
-        provide a medical diagnosis or replace professional medical advice.
+        Educational and informational use only. These assessments do not provide
+        a medical diagnosis or replace professional medical advice.
       </p>
     </section>
-  )
+  );
 }
 
 function HowItWorks() {
@@ -348,8 +347,8 @@ function HowItWorks() {
         </h2>
 
         <p>
-          A straightforward journey from sharing information to exploring
-          what your results may mean.
+          A straightforward journey from sharing information to exploring what
+          your results may mean.
         </p>
       </div>
 
@@ -366,7 +365,7 @@ function HowItWorks() {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
 function SafetyNotice() {
@@ -399,16 +398,14 @@ function SafetyNotice() {
         <p>
           CureAI is an educational project exploring AI-assisted health
           assessments. Results should not be used as a substitute for
-          professional medical advice, diagnosis, or treatment. Always
-          consult a qualified healthcare professional about health concerns.
+          professional medical advice, diagnosis, or treatment. Always consult a
+          qualified healthcare professional about health concerns.
         </p>
       </div>
 
-      <span className="cure-safety-signoff">
-        Awareness is a beginning.
-      </span>
+      <span className="cure-safety-signoff">Awareness is a beginning.</span>
     </section>
-  )
+  );
 }
 
 function Footer() {
@@ -425,7 +422,7 @@ function Footer() {
         <a href="#home">Back to top ↑</a>
       </div>
     </footer>
-  )
+  );
 }
 
 export default function Home() {
@@ -442,5 +439,5 @@ export default function Home() {
 
       <Footer />
     </div>
-  )
+  );
 }

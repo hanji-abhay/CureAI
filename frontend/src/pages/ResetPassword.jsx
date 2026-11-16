@@ -1,76 +1,78 @@
+import { useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 
-import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-
-const API_URL = import.meta.env.VITE_API_BASE_URL
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ResetPassword() {
-  const [searchParams] = useSearchParams()
-  const token = searchParams.get('token')
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const passwordsMatch =
-    confirmPassword.length === 0 || password === confirmPassword
+    confirmPassword.length === 0 || password === confirmPassword;
 
   async function handleSubmit(event) {
-    event.preventDefault()
-    setMessage('')
-    setError('')
+    event.preventDefault();
+    setMessage("");
+    setError("");
 
     if (!token) {
-      setError('This reset link is missing its token. Please request a new link.')
-      return
+      setError(
+        "This reset link is missing its token. Please request a new link.",
+      );
+      return;
     }
 
     if (password.length < 8) {
-      setError('Your password must contain at least 8 characters.')
-      return
+      setError("Your password must contain at least 8 characters.");
+      return;
     }
 
     if (password !== confirmPassword) {
-      setError('Your passwords do not match.')
-      return
+      setError("Your passwords do not match.");
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/reset-password`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ token, password }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Unable to reset your password.')
+        throw new Error(data.message || "Unable to reset your password.");
       }
 
-      setIsSuccess(true)
+      setIsSuccess(true);
       setMessage(
-        data.message || 'Your password has been reset. You can now sign in.'
-      )
-      setPassword('')
-      setConfirmPassword('')
+        data.message || "Your password has been reset. You can now sign in.",
+      );
+      setPassword("");
+      setConfirmPassword("");
     } catch (err) {
       setError(
-        err.message === 'Failed to fetch'
-          ? 'Unable to connect to CureAI. Please check that the backend is running and try again.'
-          : err.message || 'Something went wrong. Please request a new reset link.'
-      )
+        err.message === "Failed to fetch"
+          ? "Unable to connect to CureAI. Please check that the backend is running and try again."
+          : err.message ||
+              "Something went wrong. Please request a new reset link.",
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -155,13 +157,15 @@ function ResetPassword() {
 
       <main className="cr-main">
         <section className="cr-card">
-          <div className="cr-icon" aria-hidden="true">⌑</div>
+          <div className="cr-icon" aria-hidden="true">
+            ⌑
+          </div>
 
           <div className="cr-eyebrow">ACCOUNT SECURITY</div>
-          <h1>{isSuccess ? 'Password updated' : 'Create a new password'}</h1>
+          <h1>{isSuccess ? "Password updated" : "Create a new password"}</h1>
           <p className="cr-description">
             {isSuccess
-              ? 'Your new password is ready to use. Sign in with it to continue to CureAI.'
+              ? "Your new password is ready to use. Sign in with it to continue to CureAI."
               : "Choose a strong password you haven't used before. Confirm it below to make sure everything matches."}
           </p>
 
@@ -180,15 +184,15 @@ function ResetPassword() {
                   <input
                     id="new-password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="At least 8 characters"
                     minLength={8}
                     maxLength={128}
                     value={password}
                     onChange={(event) => {
-                      setPassword(event.target.value)
-                      setError('')
+                      setPassword(event.target.value);
+                      setError("");
                     }}
                     required
                     disabled={!token || isSubmitting}
@@ -197,10 +201,12 @@ function ResetPassword() {
                     className="cr-toggle"
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                     disabled={isSubmitting}
                   >
-                    {showPassword ? 'HIDE' : 'SHOW'}
+                    {showPassword ? "HIDE" : "SHOW"}
                   </button>
                 </div>
               </div>
@@ -215,15 +221,15 @@ function ResetPassword() {
                   <input
                     id="confirm-password"
                     name="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Enter your new password again"
                     minLength={8}
                     maxLength={128}
                     value={confirmPassword}
                     onChange={(event) => {
-                      setConfirmPassword(event.target.value)
-                      setError('')
+                      setConfirmPassword(event.target.value);
+                      setError("");
                     }}
                     required
                     disabled={!token || isSubmitting}
@@ -233,11 +239,13 @@ function ResetPassword() {
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label={
-                      showConfirmPassword ? 'Hide confirmation' : 'Show confirmation'
+                      showConfirmPassword
+                        ? "Hide confirmation"
+                        : "Show confirmation"
                     }
                     disabled={isSubmitting}
                   >
-                    {showConfirmPassword ? 'HIDE' : 'SHOW'}
+                    {showConfirmPassword ? "HIDE" : "SHOW"}
                   </button>
                 </div>
               </div>
@@ -259,20 +267,23 @@ function ResetPassword() {
                 type="submit"
                 disabled={!token || isSubmitting || !passwordsMatch}
               >
-                {isSubmitting ? 'Updating password...' : 'Reset password ↗'}
+                {isSubmitting ? "Updating password..." : "Reset password ↗"}
               </button>
             </form>
           )}
 
           {message && (
             <div className="cr-message" role="status">
-              <strong>{isSuccess ? 'Success!' : 'Notice'}</strong>
+              <strong>{isSuccess ? "Success!" : "Notice"}</strong>
               {message}
             </div>
           )}
 
-          <Link to={isSuccess ? '/login' : '/forgot-password'} className="cr-back">
-            {isSuccess ? '← Sign in to CureAI' : '← Request a new reset link'}
+          <Link
+            to={isSuccess ? "/login" : "/forgot-password"}
+            className="cr-back"
+          >
+            {isSuccess ? "← Sign in to CureAI" : "← Request a new reset link"}
           </Link>
 
           <div className="cr-divider" />
@@ -290,7 +301,7 @@ function ResetPassword() {
         © {new Date().getFullYear()} CureAI · Intelligence for Wellness
       </footer>
     </div>
-  )
+  );
 }
 
-export default ResetPassword
+export default ResetPassword;

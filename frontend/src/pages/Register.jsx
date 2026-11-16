@@ -1,103 +1,98 @@
-import { useState } from 'react'
-import { Link,  useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth.js";
 
 function Register() {
-  const navigate = useNavigate()
-  const { login } = useAuth()
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [message, setMessage] = useState('')
-  const [messageType, setMessageType] = useState('error')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
-async function handleSubmit(event) {
-  event.preventDefault()
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("error");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (isSubmitting) return
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-  setMessage('')
+    if (isSubmitting) return;
 
-  // Validate the form before making an API request.
-  if (fullName.trim().length < 2) {
-    setMessage('Please enter your full name.')
-    setMessageType('error')
-    return
-  }
+    setMessage("");
 
-  if (password.length < 8) {
-    setMessage('Your password must contain at least 8 characters.')
-    setMessageType('error')
-    return
-  }
-
-  if (password !== confirmPassword) {
-    setMessage('Your passwords do not match. Please check them.')
-    setMessageType('error')
-    return
-  }
-
-  if (!acceptedTerms) {
-    setMessage('Please acknowledge the terms before continuing.')
-    setMessageType('error')
-    return
-  }
-
-  setIsSubmitting(true)
-
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          email: email.trim(),
-          password,
-        }),
-      }
-    )
-
-    const data = await response.json().catch(() => ({}))
-
-    if (
-      !response.ok ||
-      !data.success ||
-      !data.token ||
-      !data.user
-    ) {
-      setMessage(
-        data.message || 'Unable to create your account. Please try again.'
-      )
-      setMessageType('error')
-      return
+    // Validate the form before making an API request.
+    if (fullName.trim().length < 2) {
+      setMessage("Please enter your full name.");
+      setMessageType("error");
+      return;
     }
 
-    // Store the access token in memory and share the user with the app.
-    login(data.token, data.user)
+    if (password.length < 8) {
+      setMessage("Your password must contain at least 8 characters.");
+      setMessageType("error");
+      return;
+    }
 
-    // Registration is complete. Open the protected dashboard.
-    navigate('/dashboard', { replace: true })
-  } catch (error) {
-    console.error('Registration request failed:', error)
+    if (password !== confirmPassword) {
+      setMessage("Your passwords do not match. Please check them.");
+      setMessageType("error");
+      return;
+    }
 
-    setMessage(
-      'Could not connect to CureAI. Please check that the backend server is running and try again.'
-    )
-    setMessageType('error')
-  } finally {
-    setIsSubmitting(false)
+    if (!acceptedTerms) {
+      setMessage("Please acknowledge the terms before continuing.");
+      setMessageType("error");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            fullName: fullName.trim(),
+            email: email.trim(),
+            password,
+          }),
+        },
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success || !data.token || !data.user) {
+        setMessage(
+          data.message || "Unable to create your account. Please try again.",
+        );
+        setMessageType("error");
+        return;
+      }
+
+      // Store the access token in memory and share the user with the app.
+      login(data.token, data.user);
+
+      // Registration is complete. Open the protected dashboard.
+      navigate("/dashboard", { replace: true });
+    } catch (error) {
+      console.error("Registration request failed:", error);
+
+      setMessage(
+        "Could not connect to CureAI. Please check that the backend server is running and try again.",
+      );
+      setMessageType("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
-}
 
   return (
     <main className="register-page">
@@ -555,7 +550,9 @@ async function handleSubmit(event) {
 
       <section className="register-showcase">
         <Link to="/" className="register-brand">
-          <span className="register-brand-symbol" aria-hidden="true">✳</span>
+          <span className="register-brand-symbol" aria-hidden="true">
+            ✳
+          </span>
           <span>
             Cure<span className="register-brand-ai">AI</span>
           </span>
@@ -574,14 +571,16 @@ async function handleSubmit(event) {
           </h1>
 
           <p className="register-showcase-copy">
-            Create your space to explore health information, keep track
-            of your observations, and prepare for more informed
-            conversations about your health.
+            Create your space to explore health information, keep track of your
+            observations, and prepare for more informed conversations about your
+            health.
           </p>
 
           <div className="register-benefits">
             <div className="register-benefit">
-              <span className="register-benefit-icon" aria-hidden="true">✧</span>
+              <span className="register-benefit-icon" aria-hidden="true">
+                ✧
+              </span>
               <span>
                 <strong>Explore health topics</strong>
                 <br />
@@ -590,17 +589,20 @@ async function handleSubmit(event) {
             </div>
 
             <div className="register-benefit">
-              <span className="register-benefit-icon" aria-hidden="true">⌁</span>
+              <span className="register-benefit-icon" aria-hidden="true">
+                ⌁
+              </span>
               <span>
                 <strong>Keep your journey organised</strong>
-                <br />
-                A dedicated space for your profile and assessment history
+                <br />A dedicated space for your profile and assessment history
                 as those features become available.
               </span>
             </div>
 
             <div className="register-benefit">
-              <span className="register-benefit-icon" aria-hidden="true">♡</span>
+              <span className="register-benefit-icon" aria-hidden="true">
+                ♡
+              </span>
               <span>
                 <strong>Health information, with care</strong>
                 <br />
@@ -618,7 +620,9 @@ async function handleSubmit(event) {
       <section className="register-form-side">
         <div className="register-form-wrap">
           <Link to="/" className="register-mobile-brand">
-            <span className="register-brand-symbol" aria-hidden="true">✳</span>
+            <span className="register-brand-symbol" aria-hidden="true">
+              ✳
+            </span>
             <span>
               Cure<span className="register-brand-ai">AI</span>
             </span>
@@ -643,8 +647,8 @@ async function handleSubmit(event) {
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(event) => {
-                  setFullName(event.target.value)
-                  setMessage('')
+                  setFullName(event.target.value);
+                  setMessage("");
                 }}
                 minLength={2}
                 maxLength={100}
@@ -662,8 +666,8 @@ async function handleSubmit(event) {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(event) => {
-                  setEmail(event.target.value)
-                  setMessage('')
+                  setEmail(event.target.value);
+                  setMessage("");
                 }}
                 required
               />
@@ -676,13 +680,13 @@ async function handleSubmit(event) {
                 <input
                   id="register-password"
                   className="register-input register-password-input"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="At least 8 characters"
                   value={password}
                   onChange={(event) => {
-                    setPassword(event.target.value)
-                    setMessage('')
+                    setPassword(event.target.value);
+                    setMessage("");
                   }}
                   minLength={8}
                   required
@@ -692,14 +696,15 @@ async function handleSubmit(event) {
                   type="button"
                   className="register-password-toggle"
                   onClick={() => setShowPassword((value) => !value)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
 
               <p className="register-password-hint">
-                Use at least 8 characters. Choose a password you don't use elsewhere.
+                Use at least 8 characters. Choose a password you don't use
+                elsewhere.
               </p>
             </div>
 
@@ -712,13 +717,13 @@ async function handleSubmit(event) {
                 <input
                   id="register-confirm-password"
                   className="register-input register-password-input"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="Enter your password again"
                   value={confirmPassword}
                   onChange={(event) => {
-                    setConfirmPassword(event.target.value)
-                    setMessage('')
+                    setConfirmPassword(event.target.value);
+                    setMessage("");
                   }}
                   required
                 />
@@ -726,16 +731,14 @@ async function handleSubmit(event) {
                 <button
                   type="button"
                   className="register-password-toggle"
-                  onClick={() =>
-                    setShowConfirmPassword((value) => !value)
-                  }
+                  onClick={() => setShowConfirmPassword((value) => !value)}
                   aria-label={
                     showConfirmPassword
-                      ? 'Hide confirmation password'
-                      : 'Show confirmation password'
+                      ? "Hide confirmation password"
+                      : "Show confirmation password"
                   }
                 >
-                  {showConfirmPassword ? 'Hide' : 'Show'}
+                  {showConfirmPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
@@ -745,13 +748,13 @@ async function handleSubmit(event) {
                 type="checkbox"
                 checked={acceptedTerms}
                 onChange={(event) => {
-                  setAcceptedTerms(event.target.checked)
-                  setMessage('')
+                  setAcceptedTerms(event.target.checked);
+                  setMessage("");
                 }}
               />
               <span>
-                I understand CureAI provides educational health information
-                and is not a substitute for professional medical advice.
+                I understand CureAI provides educational health information and
+                is not a substitute for professional medical advice.
                 <span> I acknowledge this before continuing.</span>
               </span>
             </label>
@@ -761,14 +764,14 @@ async function handleSubmit(event) {
               className="register-submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating account...' : 'Create account'}
+              {isSubmitting ? "Creating account..." : "Create account"}
               {!isSubmitting && <span aria-hidden="true">→</span>}
             </button>
 
             {message && (
               <p
                 className={`register-feedback ${
-                  messageType === 'success' ? 'success' : ''
+                  messageType === "success" ? "success" : ""
                 }`}
                 role="status"
               >
@@ -789,7 +792,7 @@ async function handleSubmit(event) {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
-export default Register
+export default Register;

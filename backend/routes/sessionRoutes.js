@@ -1,4 +1,3 @@
-
 import express from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
@@ -137,10 +136,7 @@ router.post("/login", async (req, res) => {
       email: email.trim().toLowerCase(),
     }).select("+password");
 
-    if (
-      !user ||
-      !(await bcrypt.compare(password, user.password))
-    ) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password.",

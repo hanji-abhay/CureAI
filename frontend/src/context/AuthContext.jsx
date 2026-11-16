@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from "react";
 
 import {
   clearAuth,
@@ -12,60 +6,60 @@ import {
   restoreSession,
   saveUser,
   setAccessToken,
-} from '../utils/api.js';
+} from "../utils/api.js";
 
-const AuthContext = createContext(null);
+import { AuthContext } from "./authContext.js";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [authStatus, setAuthStatus] = useState('checking');
-  const [authError, setAuthError] = useState('');
+  const [authStatus, setAuthStatus] = useState("checking");
+  const [authError, setAuthError] = useState("");
 
   const initializeAuth = useCallback(async () => {
-    setAuthStatus('checking');
-    setAuthError('');
+    setAuthStatus("checking");
+    setAuthError("");
 
     const result = await restoreSession();
 
-    if (result.status === 'authenticated') {
+    if (result.status === "authenticated") {
       setUser(result.user);
-      setAuthStatus('authenticated');
+      setAuthStatus("authenticated");
       return;
     }
 
-    if (result.status === 'unauthenticated') {
+    if (result.status === "unauthenticated") {
       setUser(null);
-      setAuthStatus('unauthenticated');
+      setAuthStatus("unauthenticated");
       return;
     }
 
     setAuthError(
-      'CureAI could not verify your session. Check your connection and try again.'
+      "CureAI could not verify your session. Check your connection and try again.",
     );
-    setAuthStatus('unavailable');
+    setAuthStatus("unavailable");
   }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     async function checkSession() {
-      setAuthStatus('checking');
+      setAuthStatus("checking");
 
       const result = await restoreSession();
 
       if (cancelled) return;
 
-      if (result.status === 'authenticated') {
+      if (result.status === "authenticated") {
         setUser(result.user);
-        setAuthStatus('authenticated');
-      } else if (result.status === 'unauthenticated') {
+        setAuthStatus("authenticated");
+      } else if (result.status === "unauthenticated") {
         setUser(null);
-        setAuthStatus('unauthenticated');
+        setAuthStatus("unauthenticated");
       } else {
         setAuthError(
-          'CureAI could not verify your session. Check your connection and try again.'
+          "CureAI could not verify your session. Check your connection and try again.",
         );
-        setAuthStatus('unavailable');
+        setAuthStatus("unavailable");
       }
     }
 
@@ -80,8 +74,8 @@ export function AuthProvider({ children }) {
     setAccessToken(token);
     saveUser(userData);
     setUser(userData);
-    setAuthError('');
-    setAuthStatus('authenticated');
+    setAuthError("");
+    setAuthStatus("authenticated");
   }, []);
 
   const updateUser = useCallback((userData) => {
@@ -95,8 +89,8 @@ export function AuthProvider({ children }) {
     } finally {
       clearAuth();
       setUser(null);
-      setAuthError('');
-      setAuthStatus('unauthenticated');
+      setAuthError("");
+      setAuthStatus("unauthenticated");
     }
   }, []);
 
@@ -104,28 +98,14 @@ export function AuthProvider({ children }) {
     user,
     authStatus,
     authError,
-    isCheckingAuth: authStatus === 'checking',
-    isAuthenticated: authStatus === 'authenticated',
-    isAuthUnavailable: authStatus === 'unavailable',
+    isCheckingAuth: authStatus === "checking",
+    isAuthenticated: authStatus === "authenticated",
+    isAuthUnavailable: authStatus === "unavailable",
     retryAuth: initializeAuth,
     login,
     logout,
     updateUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error('useAuth must be used inside AuthProvider.');
-  }
-
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

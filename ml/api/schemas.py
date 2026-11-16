@@ -27,18 +27,18 @@ class ThyroidInput(BaseModel):
 # ==================================================
 
 class SkinInput(BaseModel):
-    smoke: int
-    drink: int
+    smoke: bool
+    drink: bool
     background_father: str
     background_mother: str
     age: int
-    pesticide: int
-    gender: int
-    skin_cancer_history: int
-    cancer_history: int
-    has_piped_water: int
-    has_sewage_system: int
-    fitspatrick: int
+    pesticide: bool
+    gender: str
+    skin_cancer_history: bool
+    cancer_history: bool
+    has_piped_water: bool
+    has_sewage_system: bool
+    fitspatrick: float
     region: str
     diameter_1: float
     diameter_2: float
@@ -48,7 +48,6 @@ class SkinInput(BaseModel):
     changed: str
     bleed: str
     elevation: str
-
 
 # ==================================================
 # LUNG CANCER

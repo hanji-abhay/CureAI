@@ -1,178 +1,345 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { predictBreast } from "../utils/mlApi";
+import { apiFetch } from "../utils/api";
 
-const initialAnswers = {
-  ageGroup: '',
-  changes: [],
-  duration: '',
-  familyHistory: '',
-  previousEvaluation: '',
-  notes: '',
-}
+const initialModelInput = {
+  Age: "",
+  Gender: "",
+  BMI: "",
+  Family_History: "",
+  Smoking: "",
+  Alcohol_Consumption: "",
+  Physical_Activity: "",
+  Hormone_Therapy: "",
+  Menopause_Status: "",
+  Genetic_Mutation: "",
+  Tumor_Size_cm: "",
+  Mammogram_Result: "",
+  Blood_Pressure: "",
+  Cholesterol: "",
+  Diabetes: "",
+  Exercise_Days_Per_Week: "",
+  Breastfeeding_History: "",
+  Annual_Income_USD: "",
+};
 
-const questions = [
+const breastModelFields = [
   {
-    key: 'ageGroup',
-    title: 'Which age group do you belong to?',
-    description: 'Choose the age range that includes you.',
-    options: [
-      'Under 18',
-      '18–29 years',
-      '30–39 years',
-      '40–49 years',
-      '50–59 years',
-      '60 years or above',
-    ],
+    key: "Age",
+    label: "Age",
+    type: "number",
+    step: "1",
+    min: "1",
+    hint: "Enter your age in years.",
   },
-]
+  {
+    key: "Gender",
+    label: "Gender",
+    options: ["Female", "Male"],
+  },
+  {
+    key: "BMI",
+    label: "BMI",
+    type: "number",
+    step: "any",
+    min: "0",
+    hint: "Use a value from a reliable measurement.",
+  },
+  {
+    key: "Family_History",
+    label: "Family History",
+    options: ["No", "Yes"],
+  },
+  {
+    key: "Smoking",
+    label: "Smoking",
+    options: ["No", "Yes"],
+  },
+  {
+    key: "Alcohol_Consumption",
+    label: "Alcohol Consumption",
+    options: ["No", "Yes"],
+  },
+  {
+    key: "Physical_Activity",
+    label: "Physical Activity",
+    options: ["Low", "Moderate", "High"],
+  },
+  {
+    key: "Hormone_Therapy",
+    label: "Hormone Therapy",
+    options: ["No", "Yes"],
+  },
+  {
+    key: "Menopause_Status",
+    label: "Menopause Status",
+    options: ["Pre", "Post"],
+  },
+  {
+    key: "Genetic_Mutation",
+    label: "Genetic Mutation",
+    options: ["Negative", "Positive"],
+    hint: "Use a confirmed genetic test result. Do not guess.",
+  },
+  {
+    key: "Tumor_Size_cm",
+    label: "Tumor Size (cm)",
+    type: "number",
+    step: "any",
+    min: "0",
+    hint: "Requires a confirmed medical measurement.",
+  },
+  {
+    key: "Mammogram_Result",
+    label: "Mammogram Result",
+    options: ["Normal", "Abnormal", "Suspicious"],
+    hint: "Use the result stated in your mammogram report.",
+  },
+  {
+    key: "Blood_Pressure",
+    label: "Blood Pressure",
+    type: "number",
+    step: "any",
+    min: "0",
+    hint: "Enter a measured value. The dataset unit and format should be verified.",
+  },
+  {
+    key: "Cholesterol",
+    label: "Cholesterol",
+    type: "number",
+    step: "any",
+    min: "0",
+    hint: "Use a measured value. Confirm the expected unit.",
+  },
+  {
+    key: "Diabetes",
+    label: "Diabetes",
+    options: ["No", "Yes"],
+  },
+  {
+    key: "Exercise_Days_Per_Week",
+    label: "Exercise Days Per Week",
+    type: "number",
+    step: "1",
+    min: "0",
+    max: "7",
+  },
+  {
+    key: "Breastfeeding_History",
+    label: "Breastfeeding History",
+    options: ["No", "Yes", "Not Applicable"],
+  },
+  {
+    key: "Annual_Income_USD",
+    label: "Annual Income (USD)",
+    type: "number",
+    step: "any",
+    min: "0",
+    hint: "Required by the model dataset, although it is not a medical measurement.",
+  },
+];
 
-const changeOptions = [
-  {
-    value: 'Lump or thickening',
-    label: 'A new lump or area of thickening',
-    detail: 'A new or distinct area that feels different.',
-  },
-  {
-    value: 'Shape or size change',
-    label: 'A change in breast size or shape',
-    detail: 'A change that is new or unusual for you.',
-  },
-  {
-    value: 'Skin changes',
-    label: 'Skin dimpling, puckering, or redness',
-    detail: 'A visible change in the skin of the breast.',
-  },
-  {
-    value: 'Nipple changes',
-    label: 'A new nipple change',
-    detail: 'For example, a newly inverted nipple.',
-  },
-  {
-    value: 'Nipple discharge',
-    label: 'Nipple discharge',
-    detail: 'Especially discharge that is bloody or occurs without squeezing.',
-  },
-  {
-    value: 'Persistent pain',
-    label: 'Persistent or unusual breast pain',
-    detail: 'Pain that is new, ongoing, or different from usual.',
-  },
-  {
-    value: 'Underarm change',
-    label: 'A lump or swelling near the underarm',
-    detail: 'A new change around the armpit or collarbone.',
-  },
-  {
-    value: 'No changes',
-    label: 'None of these changes',
-    detail: 'I am exploring breast health without a specific change.',
-  },
-]
-
-const steps = [
-  { label: 'About you', number: '01' },
-  { label: 'Changes', number: '02' },
-  { label: 'Health history', number: '03' },
-]
-
-function ChoiceCard({ selected, onClick, children, description }) {
+function BreastModelField({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+  type = "text",
+  step,
+  min,
+  max,
+  hint,
+}) {
   return (
-    <button
-      type="button"
-      className={`breast-choice ${selected ? 'selected' : ''}`}
-      onClick={onClick}
-      aria-pressed={selected}
-    >
-      <span className="breast-choice-indicator">
-        {selected ? '✓' : ''}
-      </span>
-      <span className="breast-choice-copy">
-        <span className="breast-choice-title">{children}</span>
-        {description && (
-          <span className="breast-choice-description">
-            {description}
-          </span>
-        )}
-      </span>
-    </button>
-  )
+    <label className="breast-model-field">
+      <span className="breast-model-label">{label}</span>
+
+      {options ? (
+        <select
+          name={name}
+          value={value}
+          onChange={(event) => onChange(name, event.target.value)}
+          required
+        >
+          <option value="">Select an option</option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={(event) => onChange(name, event.target.value)}
+          step={step}
+          min={min}
+          max={max}
+          required
+        />
+      )}
+
+      {hint && <small className="breast-field-hint">{hint}</small>}
+    </label>
+  );
 }
 
 function BreastAssessment() {
-  const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState(initialAnswers)
-  const [reviewing, setReviewing] = useState(false)
+  const [modelInput, setModelInput] = useState(initialModelInput);
+  const [prediction, setPrediction] = useState(null);
+  const [predicting, setPredicting] = useState(false);
+  const [predictionError, setPredictionError] = useState("");
+  const [saveStatus, setSaveStatus] = useState("");
+  const [saveError, setSaveError] = useState("");
 
-  const updateAnswer = (key, value) => {
-    setAnswers((previous) => ({
+  const updateModelInput = (key, value) => {
+    setModelInput((previous) => ({
       ...previous,
       [key]: value,
-    }))
-  }
+    }));
 
-  const toggleChange = (value) => {
-    setAnswers((previous) => {
-      const selected = previous.changes
-
-      if (value === 'No changes') {
-        return {
-          ...previous,
-          changes: selected.includes(value) ? [] : [value],
-        }
-      }
-
-      const withoutNone = selected.filter(
-        (item) => item !== 'No changes'
-      )
-
-      return {
-        ...previous,
-        changes: withoutNone.includes(value)
-          ? withoutNone.filter((item) => item !== value)
-          : [...withoutNone, value],
-      }
-    })
-  }
-
-  const canContinue = () => {
-    if (step === 0) return Boolean(answers.ageGroup)
-    if (step === 1) return answers.changes.length > 0
-    if (step === 2) {
-      return Boolean(
-        answers.duration &&
-          answers.familyHistory &&
-          answers.previousEvaluation
-      )
-    }
-    return true
-  }
+    setPrediction(null);
+    setPredictionError("");
+    setSaveStatus("");
+    setSaveError("");
+  };
 
   const resetAssessment = () => {
-    setAnswers(initialAnswers)
-    setStep(0)
-    setReviewing(false)
-  }
+    setModelInput({ ...initialModelInput });
+    setPrediction(null);
+    setPredictionError("");
+    setPredicting(false);
+    setSaveStatus("");
+    setSaveError("");
+  };
 
-  const startReview = () => {
-    if (canContinue()) setReviewing(true)
-  }
+  const handleBreastPrediction = async (event) => {
+    event.preventDefault();
 
-  const sections = [
-    {
-      title: 'About you',
-      subtitle: 'A little context before we begin.',
-    },
-    {
-      title: 'Changes you have noticed',
-      subtitle:
-        'Select any changes that apply. Everyone’s experience is different.',
-    },
-    {
-      title: 'Your health history',
-      subtitle:
-        'These details can help you prepare for a conversation with a healthcare professional.',
-    },
-  ]
+    setPrediction(null);
+    setPredictionError("");
+    setSaveStatus("");
+    setSaveError("");
+
+    // Check that every required model field has been supplied.
+    const missingFields = breastModelFields.filter(
+      (field) => String(modelInput[field.key]).trim() === "",
+    );
+
+    if (missingFields.length > 0) {
+      setPredictionError(
+        `Please complete all required fields: ${missingFields
+          .map((field) => field.label)
+          .join(", ")}.`,
+      );
+      return;
+    }
+
+    // Validate numeric fields before sending the request.
+    const numericFields = [
+      "Age",
+      "BMI",
+      "Tumor_Size_cm",
+      "Blood_Pressure",
+      "Cholesterol",
+      "Exercise_Days_Per_Week",
+      "Annual_Income_USD",
+    ];
+
+    for (const key of numericFields) {
+      const value = Number(modelInput[key]);
+
+      if (!Number.isFinite(value) || value < 0) {
+        setPredictionError(
+          `Please enter a valid non-negative number for ${key.replaceAll("_", " ")}.`,
+        );
+        return;
+      }
+    }
+
+    if (
+      !Number.isInteger(Number(modelInput.Age)) ||
+      Number(modelInput.Age) < 1
+    ) {
+      setPredictionError("Please enter a valid whole-number age.");
+      return;
+    }
+
+    const exerciseDays = Number(modelInput.Exercise_Days_Per_Week);
+
+    if (
+      !Number.isInteger(exerciseDays) ||
+      exerciseDays < 0 ||
+      exerciseDays > 7
+    ) {
+      setPredictionError(
+        "Exercise days per week must be a whole number between 0 and 7.",
+      );
+      return;
+    }
+
+    const payload = {
+      ...modelInput,
+      Age: Number(modelInput.Age),
+      BMI: Number(modelInput.BMI),
+      Tumor_Size_cm: Number(modelInput.Tumor_Size_cm),
+      Blood_Pressure: Number(modelInput.Blood_Pressure),
+      Cholesterol: Number(modelInput.Cholesterol),
+      Exercise_Days_Per_Week: exerciseDays,
+      Annual_Income_USD: Number(modelInput.Annual_Income_USD),
+    };
+
+    setPredicting(true);
+
+    try {
+      const result = await predictBreast(payload);
+      setPrediction(result);
+
+      // Save the completed assessment in MongoDB.
+      try {
+        const response = await apiFetch("/api/assessments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            assessmentType: "breast",
+            answers: payload,
+            prediction: result,
+          }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to save your assessment.");
+        }
+
+        setSaveStatus("Your assessment has been saved successfully.");
+      } catch (error) {
+        setSaveError(
+          error.message ||
+            "Your prediction was generated, but the assessment could not be saved.",
+        );
+      }
+    } catch (error) {
+      setPredictionError(
+        error.response?.data?.detail ||
+          error.message ||
+          "Unable to get a prediction. Please try again.",
+      );
+    } finally {
+      setPredicting(false);
+    }
+  };
+
+  const completedFields = breastModelFields.filter(
+    (field) => String(modelInput[field.key]).trim() !== "",
+  ).length;
 
   return (
     <main className="breast-page">
@@ -185,11 +352,11 @@ function BreastAssessment() {
           --breast-muted: #71817b;
           --breast-line: #e7e8e1;
           min-height: 100vh;
+          padding-bottom: 56px;
           background: #f7f5ef;
           color: var(--breast-ink);
           font-family: Inter, ui-sans-serif, system-ui, -apple-system,
             BlinkMacSystemFont, "Segoe UI", sans-serif;
-          padding-bottom: 56px;
         }
 
         .breast-page * {
@@ -207,11 +374,11 @@ function BreastAssessment() {
         }
 
         .breast-brand {
-          color: var(--breast-ink);
-          text-decoration: none;
           display: flex;
           align-items: center;
           gap: 10px;
+          color: var(--breast-ink);
+          text-decoration: none;
           font-size: 21px;
           font-weight: 750;
           letter-spacing: -0.8px;
@@ -223,8 +390,8 @@ function BreastAssessment() {
           display: grid;
           place-items: center;
           border-radius: 11px;
-          color: white;
           background: #214e46;
+          color: white;
           font-size: 17px;
         }
 
@@ -244,15 +411,15 @@ function BreastAssessment() {
         }
 
         .breast-shell {
-          max-width: 940px;
+          max-width: 1000px;
           margin: 0 auto;
           padding: 40px 24px 0;
         }
 
         .breast-heading {
-          text-align: center;
           max-width: 660px;
           margin: 0 auto 30px;
+          text-align: center;
         }
 
         .breast-eyebrow {
@@ -284,26 +451,26 @@ function BreastAssessment() {
         }
 
         .breast-heading p {
+          max-width: 560px;
           margin: 0 auto;
-          max-width: 540px;
           color: var(--breast-muted);
           font-size: 14px;
           line-height: 1.8;
         }
 
         .breast-progress-card {
-          padding: 21px 25px;
           margin-bottom: 20px;
-          background: #fffefa;
+          padding: 19px 23px;
           border: 1px solid var(--breast-line);
-          border-radius: 18px;
+          border-radius: 16px;
+          background: #fffefa;
         }
 
         .breast-progress-top {
           display: flex;
           justify-content: space-between;
           gap: 12px;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
           font-size: 12px;
           font-weight: 700;
         }
@@ -314,7 +481,7 @@ function BreastAssessment() {
 
         .breast-progress-track {
           width: 100%;
-          height: 5px;
+          height: 6px;
           overflow: hidden;
           border-radius: 20px;
           background: #eeeae3;
@@ -324,50 +491,7 @@ function BreastAssessment() {
           height: 100%;
           border-radius: inherit;
           background: var(--breast-pink);
-          transition: width 220ms ease;
-        }
-
-        .breast-step-labels {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 8px;
-          margin-top: 18px;
-        }
-
-        .breast-step-label {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          color: #98a19b;
-          font-size: 11px;
-          font-weight: 650;
-        }
-
-        .breast-step-number {
-          width: 25px;
-          height: 25px;
-          flex-shrink: 0;
-          display: grid;
-          place-items: center;
-          border: 1px solid #e4e5dd;
-          border-radius: 50%;
-          font-size: 10px;
-        }
-
-        .breast-step-label.active {
-          color: var(--breast-ink);
-        }
-
-        .breast-step-label.active .breast-step-number {
-          color: white;
-          border-color: var(--breast-pink);
-          background: var(--breast-pink);
-        }
-
-        .breast-step-label.completed .breast-step-number {
-          color: var(--breast-pink-dark);
-          border-color: #ecc4d2;
-          background: var(--breast-pink-light);
+          transition: width 180ms ease;
         }
 
         .breast-form-card {
@@ -402,132 +526,58 @@ function BreastAssessment() {
           line-height: 1.75;
         }
 
-        .breast-field {
-          margin-top: 27px;
-        }
-
-        .breast-field:first-of-type {
-          margin-top: 0;
-        }
-
-        .breast-field-label {
-          display: block;
-          margin-bottom: 12px;
-          font-size: 13px;
-          font-weight: 750;
-          line-height: 1.6;
-        }
-
-        .breast-field-hint {
-          display: block;
-          margin-top: 4px;
-          color: var(--breast-muted);
-          font-size: 11px;
-          font-weight: 400;
-          line-height: 1.6;
-        }
-
-        .breast-choice-grid {
+        .breast-model-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+          gap: 21px 18px;
+          margin: 24px 0;
         }
 
-        .breast-choice {
-          width: 100%;
+        .breast-model-field {
           min-width: 0;
           display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 15px;
-          text-align: left;
-          color: var(--breast-ink);
-          border: 1px solid #e6e7df;
-          border-radius: 13px;
-          background: #fffefa;
-          cursor: pointer;
-          transition: border-color 160ms ease,
-            background 160ms ease, transform 160ms ease;
-        }
-
-        .breast-choice:hover {
-          border-color: #d9a0b4;
-          transform: translateY(-1px);
-        }
-
-        .breast-choice.selected {
-          border-color: var(--breast-pink);
-          background: #fff5f8;
-        }
-
-        .breast-choice-indicator {
-          width: 18px;
-          height: 18px;
-          flex-shrink: 0;
-          display: grid;
-          place-items: center;
-          margin-top: 1px;
-          border: 1px solid #d7dbd3;
-          border-radius: 5px;
-          color: white;
-          font-size: 11px;
-        }
-
-        .breast-choice.selected .breast-choice-indicator {
-          border-color: var(--breast-pink);
-          background: var(--breast-pink);
-        }
-
-        .breast-choice-copy {
-          display: flex;
           flex-direction: column;
-          gap: 5px;
+          gap: 8px;
         }
 
-        .breast-choice-title {
+        .breast-model-label {
           font-size: 12px;
           font-weight: 750;
-          line-height: 1.55;
         }
 
-        .breast-choice-description {
-          color: var(--breast-muted);
-          font-size: 11px;
-          line-height: 1.6;
-        }
-
-        .breast-textarea {
-          display: block;
+        .breast-model-field input,
+        .breast-model-field select {
           width: 100%;
-          min-height: 110px;
-          resize: vertical;
-          padding: 14px 15px;
-          border: 1px solid #e0e3da;
-          border-radius: 12px;
+          min-height: 44px;
+          padding: 11px 13px;
+          border: 1px solid #dfe3da;
+          border-radius: 10px;
           outline: none;
-          background: #fffefa;
+          background: white;
           color: var(--breast-ink);
           font: inherit;
           font-size: 13px;
-          line-height: 1.7;
           transition: border-color 160ms ease,
             box-shadow 160ms ease;
         }
 
-        .breast-textarea:focus {
+        .breast-model-field input:focus,
+        .breast-model-field select:focus {
           border-color: var(--breast-pink);
           box-shadow: 0 0 0 3px rgba(200, 92, 130, 0.1);
         }
 
-        .breast-textarea::placeholder {
-          color: #a1aaa2;
+        .breast-field-hint {
+          color: var(--breast-muted);
+          font-size: 10px;
+          line-height: 1.6;
         }
 
         .breast-note {
           display: flex;
           align-items: flex-start;
           gap: 12px;
-          margin-top: 25px;
+          margin-top: 22px;
           padding: 15px 16px;
           border: 1px solid #eed4de;
           border-radius: 13px;
@@ -542,14 +592,54 @@ function BreastAssessment() {
           font-size: 16px;
         }
 
+        .breast-error {
+          margin-top: 18px;
+          padding: 12px 14px;
+          border: 1px solid #f0c8c5;
+          border-radius: 10px;
+          background: #fff4f2;
+          color: #b42318;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+
+        .breast-result {
+          margin-top: 20px;
+          padding: 20px;
+          border: 1px solid #d8e8df;
+          border-radius: 14px;
+          background: #f4faf6;
+        }
+
+        .breast-result h3 {
+          margin: 0 0 12px;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 22px;
+          font-weight: 500;
+        }
+
+        .breast-result p {
+          margin: 8px 0;
+          font-size: 12px;
+          line-height: 1.7;
+          overflow-wrap: anywhere;
+        }
+
         .breast-form-footer {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 12px;
-          margin-top: 30px;
+          margin-top: 28px;
           padding-top: 22px;
           border-top: 1px solid #eeeee7;
+        }
+
+        .breast-footer-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
         }
 
         .breast-button {
@@ -574,13 +664,13 @@ function BreastAssessment() {
         }
 
         .breast-button:disabled {
-          opacity: 0.42;
+          opacity: 0.55;
           cursor: not-allowed;
         }
 
         .breast-button-primary {
-          color: white;
           background: var(--breast-pink-dark);
+          color: white;
         }
 
         .breast-button-primary:hover:not(:disabled) {
@@ -588,70 +678,14 @@ function BreastAssessment() {
         }
 
         .breast-button-secondary {
-          color: var(--breast-ink);
           border-color: #e1e4dc;
           background: #fffefa;
-        }
-
-        .breast-review-row {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 15px;
-          padding: 17px 0;
-          border-bottom: 1px solid #eeeee7;
-        }
-
-        .breast-review-row:last-child {
-          border-bottom: 0;
-        }
-
-        .breast-review-label {
-          color: var(--breast-muted);
-          font-size: 12px;
-          line-height: 1.6;
-        }
-
-        .breast-review-value {
-          max-width: 65%;
           color: var(--breast-ink);
-          font-size: 12px;
-          font-weight: 700;
-          line-height: 1.7;
-          text-align: right;
-          overflow-wrap: anywhere;
-        }
-
-        .breast-review-edit {
-          padding: 5px 0;
-          border: 0;
-          color: var(--breast-pink-dark);
-          background: transparent;
-          font: inherit;
-          font-size: 11px;
-          font-weight: 750;
-          cursor: pointer;
-        }
-
-        .breast-review-edit:hover {
-          text-decoration: underline;
-        }
-
-        .breast-success-mark {
-          width: 58px;
-          height: 58px;
-          display: grid;
-          place-items: center;
-          margin-bottom: 20px;
-          border-radius: 18px;
-          color: var(--breast-pink-dark);
-          background: var(--breast-pink-light);
-          font-size: 25px;
         }
 
         .breast-footer {
-          margin: 25px auto 0;
           max-width: 580px;
+          margin: 25px auto 0;
           color: #859088;
           font-size: 10px;
           line-height: 1.8;
@@ -675,31 +709,25 @@ function BreastAssessment() {
             margin-bottom: 23px;
           }
 
-          .breast-progress-card {
-            padding: 17px;
-          }
-
-          .breast-step-label {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 5px;
-            font-size: 10px;
-          }
-
-          .breast-choice-grid {
+          .breast-model-grid {
             grid-template-columns: 1fr;
+            gap: 17px;
           }
 
           .breast-form-footer {
             align-items: stretch;
           }
 
-          .breast-button {
-            padding: 11px 14px;
+          .breast-footer-actions {
+            width: 100%;
           }
 
-          .breast-review-row {
-            gap: 10px;
+          .breast-footer-actions .breast-button {
+            flex: 1;
+          }
+
+          .breast-form-footer > .breast-button {
+            width: 100%;
           }
         }
 
@@ -715,7 +743,9 @@ function BreastAssessment() {
 
       <nav className="breast-nav">
         <Link to="/" className="breast-brand" aria-label="CureAI home">
-          <span className="breast-brand-mark" aria-hidden="true">✳</span>
+          <span className="breast-brand-mark" aria-hidden="true">
+            ✳
+          </span>
           <span>
             Cure<span className="breast-brand-ai">AI</span>
           </span>
@@ -730,7 +760,7 @@ function BreastAssessment() {
         <header className="breast-heading">
           <span className="breast-eyebrow">
             <span aria-hidden="true">♡</span>
-            Breast health awareness
+            Breast health assessment
           </span>
 
           <h1>
@@ -738,431 +768,150 @@ function BreastAssessment() {
           </h1>
 
           <p>
-            Take a moment to reflect on your breast health. This guided
-            questionnaire helps you organise what you have noticed and
-            prepare for a conversation with a qualified healthcare
-            professional.
+            Provide the information requested by the experimental
+            machine-learning model. Use reliable measurements and confirmed
+            medical reports wherever applicable.
           </p>
         </header>
 
-        {!reviewing ? (
-          <>
-            <section className="breast-progress-card" aria-label="Assessment progress">
-              <div className="breast-progress-top">
-                <span>{sections[step].title}</span>
-                <span className="breast-progress-count">
-                  STEP {step + 1} OF {steps.length}
-                </span>
-              </div>
+        <section className="breast-progress-card">
+          <div className="breast-progress-top">
+            <span>Assessment information</span>
+            <span className="breast-progress-count">
+              {completedFields} / {breastModelFields.length} fields completed
+            </span>
+          </div>
 
-              <div
-                className="breast-progress-track"
-                role="progressbar"
-                aria-valuemin={1}
-                aria-valuemax={steps.length}
-                aria-valuenow={step + 1}
-              >
-                <div
-                  className="breast-progress-fill"
-                  style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+          <div
+            className="breast-progress-track"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={breastModelFields.length}
+            aria-valuenow={completedFields}
+          >
+            <div
+              className="breast-progress-fill"
+              style={{
+                width: `${(completedFields / breastModelFields.length) * 100}%`,
+              }}
+            />
+          </div>
+        </section>
+
+        <section className="breast-form-card">
+          <p className="breast-section-kicker">CUREAI · BREAST HEALTH</p>
+
+          <h2 className="breast-section-title">
+            AI-assisted Breast Assessment
+          </h2>
+
+          <p className="breast-section-subtitle">
+            Complete all 18 fields to submit the model input. Fields requiring
+            medical reports or measurements should only be completed using
+            confirmed information.
+          </p>
+
+          <form onSubmit={handleBreastPrediction}>
+            <div className="breast-model-grid">
+              {breastModelFields.map((field) => (
+                <BreastModelField
+                  key={field.key}
+                  label={field.label}
+                  name={field.key}
+                  value={modelInput[field.key]}
+                  onChange={updateModelInput}
+                  options={field.options}
+                  type={field.type}
+                  step={field.step}
+                  min={field.min}
+                  max={field.max}
+                  hint={field.hint}
                 />
-              </div>
-
-              <div className="breast-step-labels">
-                {steps.map((item, index) => (
-                  <div
-                    key={item.number}
-                    className={`breast-step-label ${
-                      index === step
-                        ? 'active'
-                        : index < step
-                          ? 'completed'
-                          : ''
-                    }`}
-                  >
-                    <span className="breast-step-number">
-                      {index < step ? '✓' : item.number}
-                    </span>
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="breast-form-card">
-              <p className="breast-section-kicker">
-                CUREAI · BREAST HEALTH
-              </p>
-
-              <h2 className="breast-section-title">
-                {sections[step].title}
-              </h2>
-
-              <p className="breast-section-subtitle">
-                {sections[step].subtitle}
-              </p>
-
-              {step === 0 && (
-                <div className="breast-field">
-                  <label className="breast-field-label">
-                    Which age group do you belong to?
-                    <span className="breast-field-hint">
-                      This helps provide context for a healthcare discussion.
-                    </span>
-                  </label>
-
-                  <div className="breast-choice-grid">
-                    {questions[0].options.map((option) => (
-                      <ChoiceCard
-                        key={option}
-                        selected={answers.ageGroup === option}
-                        onClick={() => updateAnswer('ageGroup', option)}
-                      >
-                        {option}
-                      </ChoiceCard>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {step === 1 && (
-                <div className="breast-field">
-                  <label className="breast-field-label">
-                    Have you noticed any of these changes?
-                    <span className="breast-field-hint">
-                      Select all that apply. Choose “None” only if none
-                      of the listed changes apply to you.
-                    </span>
-                  </label>
-
-                  <div className="breast-choice-grid">
-                    {changeOptions.map((option) => (
-                      <ChoiceCard
-                        key={option.value}
-                        selected={answers.changes.includes(option.value)}
-                        onClick={() => toggleChange(option.value)}
-                        description={option.detail}
-                      >
-                        {option.label}
-                      </ChoiceCard>
-                    ))}
-                  </div>
-
-                  <div className="breast-field">
-                    <label className="breast-field-label">
-                      How long have you noticed these changes?
-                    </label>
-
-                    <div className="breast-choice-grid">
-                      {[
-                        'Less than 2 weeks',
-                        '2–6 weeks',
-                        'More than 6 weeks',
-                        'No specific change / not sure',
-                      ].map((option) => (
-                        <ChoiceCard
-                          key={option}
-                          selected={answers.duration === option}
-                          onClick={() => updateAnswer('duration', option)}
-                        >
-                          {option}
-                        </ChoiceCard>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {step === 2 && (
-                <>
-                  <div className="breast-field">
-                    <label className="breast-field-label">
-                      Is there a family history of breast or ovarian cancer?
-                    </label>
-
-                    <div className="breast-choice-grid">
-                      {[
-                        'Yes',
-                        'No',
-                        'Not sure',
-                        'Prefer not to say',
-                      ].map((option) => (
-                        <ChoiceCard
-                          key={option}
-                          selected={answers.familyHistory === option}
-                          onClick={() =>
-                            updateAnswer('familyHistory', option)
-                          }
-                        >
-                          {option}
-                        </ChoiceCard>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="breast-field">
-                    <label className="breast-field-label">
-                      Have you discussed these concerns with a healthcare
-                      professional before?
-                    </label>
-
-                    <div className="breast-choice-grid">
-                      {[
-                        'Yes, previously evaluated',
-                        'No, not yet',
-                        'No concerns to discuss',
-                        'Prefer not to say',
-                      ].map((option) => (
-                        <ChoiceCard
-                          key={option}
-                          selected={answers.previousEvaluation === option}
-                          onClick={() =>
-                            updateAnswer('previousEvaluation', option)
-                          }
-                        >
-                          {option}
-                        </ChoiceCard>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="breast-field">
-                    <label className="breast-field-label" htmlFor="breast-notes">
-                      Anything else you would like to record?
-                      <span className="breast-field-hint">
-                        Optional. Avoid entering names or other identifying
-                        information.
-                      </span>
-                    </label>
-
-                    <textarea
-                      id="breast-notes"
-                      className="breast-textarea"
-                      value={answers.notes}
-                      onChange={(event) =>
-                        updateAnswer('notes', event.target.value)
-                      }
-                      placeholder="Record questions, observations, or details you would like to discuss..."
-                      maxLength={1000}
-                    />
-                  </div>
-
-                  <div className="breast-note">
-                    <span className="breast-note-icon" aria-hidden="true">
-                      ♡
-                    </span>
-                    <span>
-                      <strong>Gentle but important reminder:</strong>{' '}
-                      a new lump, bloody nipple discharge, new nipple
-                      inversion, skin dimpling, or another persistent
-                      breast change deserves prompt clinical evaluation.
-                      Do not wait to complete this questionnaire before
-                      seeking care.
-                    </span>
-                  </div>
-                </>
-              )}
-
-              <div className="breast-form-footer">
-                <button
-                  type="button"
-                  className="breast-button breast-button-secondary"
-                  onClick={() => {
-                    if (step === 0) {
-                      window.location.href = '/'
-                    } else {
-                      setStep((current) => current - 1)
-                    }
-                  }}
-                >
-                  {step === 0 ? '← Exit assessment' : '← Previous'}
-                </button>
-
-                {step < 2 ? (
-                  <button
-                    type="button"
-                    className="breast-button breast-button-primary"
-                    disabled={!canContinue()}
-                    onClick={() => setStep((current) => current + 1)}
-                  >
-                    Continue <span aria-hidden="true">→</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="breast-button breast-button-primary"
-                    disabled={!canContinue()}
-                    onClick={startReview}
-                  >
-                    Review answers <span aria-hidden="true">→</span>
-                  </button>
-                )}
-              </div>
-            </section>
-          </>
-        ) : (
-          <section className="breast-form-card">
-            <div className="breast-success-mark" aria-hidden="true">♡</div>
-
-            <p className="breast-section-kicker">
-              YOUR RESPONSES
-            </p>
-
-            <h2 className="breast-section-title">
-              Take a look before you finish.
-            </h2>
-
-            <p className="breast-section-subtitle">
-              Review the information you entered. This is a summary of
-              your responses, not a medical result or cancer assessment.
-            </p>
-
-            <div>
-              <div className="breast-review-row">
-                <span className="breast-review-label">Age group</span>
-                <span className="breast-review-value">{answers.ageGroup}</span>
-                <button
-                  type="button"
-                  className="breast-review-edit"
-                  onClick={() => {
-                    setStep(0)
-                    setReviewing(false)
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-
-              <div className="breast-review-row">
-                <span className="breast-review-label">Changes noticed</span>
-                <span className="breast-review-value">
-                  {answers.changes.join(', ')}
-                </span>
-                <button
-                  type="button"
-                  className="breast-review-edit"
-                  onClick={() => {
-                    setStep(1)
-                    setReviewing(false)
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-
-              <div className="breast-review-row">
-                <span className="breast-review-label">Duration</span>
-                <span className="breast-review-value">
-                  {answers.duration}
-                </span>
-                <button
-                  type="button"
-                  className="breast-review-edit"
-                  onClick={() => {
-                    setStep(1)
-                    setReviewing(false)
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-
-              <div className="breast-review-row">
-                <span className="breast-review-label">Family history</span>
-                <span className="breast-review-value">
-                  {answers.familyHistory}
-                </span>
-                <button
-                  type="button"
-                  className="breast-review-edit"
-                  onClick={() => {
-                    setStep(2)
-                    setReviewing(false)
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-
-              <div className="breast-review-row">
-                <span className="breast-review-label">
-                  Previous evaluation
-                </span>
-                <span className="breast-review-value">
-                  {answers.previousEvaluation}
-                </span>
-                <button
-                  type="button"
-                  className="breast-review-edit"
-                  onClick={() => {
-                    setStep(2)
-                    setReviewing(false)
-                  }}
-                >
-                  Edit
-                </button>
-              </div>
-
-              {answers.notes.trim() && (
-                <div className="breast-review-row">
-                  <span className="breast-review-label">Your notes</span>
-                  <span className="breast-review-value">
-                    {answers.notes}
-                  </span>
-                  <button
-                    type="button"
-                    className="breast-review-edit"
-                    onClick={() => {
-                      setStep(2)
-                      setReviewing(false)
-                    }}
-                  >
-                    Edit
-                  </button>
-                </div>
-              )}
+              ))}
             </div>
 
             <div className="breast-note">
-              <span className="breast-note-icon" aria-hidden="true">♡</span>
+              <span className="breast-note-icon" aria-hidden="true">
+                ♡
+              </span>
               <span>
-                CureAI does not diagnose breast conditions or estimate
-                your cancer risk from these answers. Consider sharing
-                your observations with a qualified healthcare professional.
-                This summary remains in the current page state and is
-                not saved to an account or sent to a server.
+                <strong>Important:</strong> Do not guess tumor size, mammogram
+                results, genetic test results, blood pressure, or cholesterol.
+                Annual income is included because the existing model requires
+                it, not because it is a medical measurement. If you do not have
+                reliable information, do not submit an invented value.
               </span>
             </div>
+
+            {predictionError && (
+              <p role="alert" className="breast-error">
+                {predictionError}
+              </p>
+            )}
+
+            {prediction && (
+              <div className="breast-result" role="status">
+                <h3>Model Output</h3>
+                <p>
+                  <strong>Predicted class:</strong>{" "}
+                  {String(prediction.prediction)}
+                </p>
+                {prediction.message && <p>{prediction.message}</p>}
+                <p>
+                  This is an experimental machine-learning output. Its classes
+                  have not been clinically validated or interpreted here. It is
+                  not a cancer diagnosis, screening result, or confirmation that
+                  cancer is present or absent.
+                </p>
+              </div>
+            )}
+
+            {saveStatus && (
+              <div className="breast-result" role="status">
+                <strong>✓ Saved to your records</strong>
+                <p>{saveStatus}</p>
+              </div>
+            )}
+
+            {saveError && (
+              <div className="breast-error" role="alert">
+                <strong>
+                  Your prediction was generated, but it could not be saved.
+                </strong>
+                <p>{saveError}</p>
+              </div>
+            )}
 
             <div className="breast-form-footer">
               <button
                 type="button"
                 className="breast-button breast-button-secondary"
-                onClick={() => setReviewing(false)}
+                onClick={resetAssessment}
+                disabled={predicting}
               >
-                ← Back
+                Reset Form ↻
               </button>
 
               <button
-                type="button"
+                type="submit"
                 className="breast-button breast-button-primary"
-                onClick={resetAssessment}
+                disabled={predicting}
               >
-                Start again ↻
+                {predicting ? "Processing..." : "Run AI Assessment →"}
               </button>
             </div>
-          </section>
-        )}
+          </form>
+        </section>
 
         <p className="breast-footer">
           CureAI · Intelligence for Wellness
           <br />
-          Educational support only. This questionnaire is not a substitute
-          for professional medical advice, examination, screening, or diagnosis.
+          Educational support only. This tool does not replace professional
+          medical advice, examination, screening, or diagnosis.
         </p>
       </div>
     </main>
-  )
+  );
 }
 
-export default BreastAssessment
+export default BreastAssessment;

@@ -1,57 +1,53 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 function ForgotPassword() {
-  const [email, setEmail] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState(false)
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState(false);
 
   async function handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (isSubmitting) return
+    if (isSubmitting) return;
 
-    setIsSubmitting(true)
-    setMessage('')
-    setError(false)
+    setIsSubmitting(true);
+    setMessage("");
+    setError(false);
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/forgot-password`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.trim().toLowerCase(),
-          }),
-        }
-      )
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok || !data.success) {
         throw new Error(
-          data.message || 'Unable to process your request. Please try again.'
-        )
+          data.message || "Unable to process your request. Please try again.",
+        );
       }
 
       setMessage(
         data.message ||
-          'If an account exists for that email, recovery instructions will be sent.'
-      )
+          "If an account exists for that email, recovery instructions will be sent.",
+      );
     } catch (err) {
-      setError(true)
+      setError(true);
       setMessage(
-        err.message ||
-          'Unable to connect to CureAI. Please try again.'
-      )
+        err.message || "Unable to connect to CureAI. Please try again.",
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -129,13 +125,15 @@ function ForgotPassword() {
 
       <main className="cf-main">
         <section className="cf-card">
-          <div className="cf-icon" aria-hidden="true">⌑</div>
+          <div className="cf-icon" aria-hidden="true">
+            ⌑
+          </div>
 
           <div className="cf-eyebrow">ACCOUNT RECOVERY</div>
           <h1>Forgot your password?</h1>
           <p className="cf-description">
-            It happens. Enter the email address associated with your account
-            and we'll guide you through the next step.
+            It happens. Enter the email address associated with your account and
+            we'll guide you through the next step.
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -149,38 +147,36 @@ function ForgotPassword() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(event) => {
-                  setEmail(event.target.value)
-                  setMessage('')
-                  setError(false)
+                  setEmail(event.target.value);
+                  setMessage("");
+                  setError(false);
                 }}
                 required
               />
             </div>
 
-            <button
-              className="cf-submit"
-              type="submit"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Sending request...' : 'Continue ↗'}
+            <button className="cf-submit" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Sending request..." : "Continue ↗"}
             </button>
           </form>
 
           {message && (
             <div
               className="cf-message"
-              role={error ? 'alert' : 'status'}
+              role={error ? "alert" : "status"}
               style={
                 error
                   ? {
-                      borderColor: '#f0d2cc',
-                      background: '#fff1ee',
-                      color: '#983e32',
+                      borderColor: "#f0d2cc",
+                      background: "#fff1ee",
+                      color: "#983e32",
                     }
                   : undefined
               }
             >
-              <strong>{error ? 'Request unsuccessful' : 'Check your inbox'}</strong>
+              <strong>
+                {error ? "Request unsuccessful" : "Check your inbox"}
+              </strong>
               {message}
             </div>
           )}
@@ -204,7 +200,7 @@ function ForgotPassword() {
         © {new Date().getFullYear()} CureAI · Intelligence for Wellness
       </footer>
     </div>
-  )
+  );
 }
 
-export default ForgotPassword
+export default ForgotPassword;

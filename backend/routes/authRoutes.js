@@ -36,10 +36,7 @@ router.post("/register", async (req, res) => {
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (
-      normalizedEmail.length > 254 ||
-      !emailPattern.test(normalizedEmail)
-    ) {
+    if (normalizedEmail.length > 254 || !emailPattern.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Please provide a valid email address.",
@@ -137,10 +134,7 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const passwordMatches = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const passwordMatches = await bcrypt.compare(password, user.password);
 
     if (!passwordMatches) {
       return res.status(401).json({
@@ -161,7 +155,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id.toString() },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "1h" },
     );
 
     return res.status(200).json({
@@ -183,7 +177,6 @@ router.post("/login", async (req, res) => {
     });
   }
 });
-
 
 /* Get the currently signed-in user's profile. */
 router.get("/me", authMiddleware, async (req, res) => {
@@ -221,19 +214,10 @@ router.get("/me", authMiddleware, async (req, res) => {
 /* Update only the authenticated user's permitted profile fields. */
 router.patch("/profile", authMiddleware, async (req, res) => {
   try {
-    const {
-      fullName,
-      email,
-      dateOfBirth,
-      pronouns,
-      country,
-      preferences,
-    } = req.body;
+    const { fullName, email, dateOfBirth, pronouns, country, preferences } =
+      req.body;
 
-    if (
-      typeof fullName !== "string" ||
-      typeof email !== "string"
-    ) {
+    if (typeof fullName !== "string" || typeof email !== "string") {
       return res.status(400).json({
         success: false,
         message: "Please provide your full name and email address.",
@@ -251,10 +235,7 @@ router.patch("/profile", authMiddleware, async (req, res) => {
       });
     }
 
-    if (
-      normalizedEmail.length > 254 ||
-      !emailPattern.test(normalizedEmail)
-    ) {
+    if (normalizedEmail.length > 254 || !emailPattern.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: "Please provide a valid email address.",
@@ -264,27 +245,23 @@ router.patch("/profile", authMiddleware, async (req, res) => {
     if (
       dateOfBirth !== undefined &&
       dateOfBirth !== "" &&
-      (
-        typeof dateOfBirth !== "string" ||
+      (typeof dateOfBirth !== "string" ||
         !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth) ||
         Number.isNaN(Date.parse(`${dateOfBirth}T00:00:00.000Z`)) ||
-        new Date(`${dateOfBirth}T00:00:00.000Z`)
-          .toISOString().slice(0, 10) !== dateOfBirth ||
-        dateOfBirth > new Date().toISOString().slice(0, 10)
-      )
+        new Date(`${dateOfBirth}T00:00:00.000Z`).toISOString().slice(0, 10) !==
+          dateOfBirth ||
+        dateOfBirth > new Date().toISOString().slice(0, 10))
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a valid date of birth that is not in the future.",
+        message:
+          "Please provide a valid date of birth that is not in the future.",
       });
     }
 
     const allowedPronouns = ["", "she/her", "he/him", "they/them", "other"];
 
-    if (
-      pronouns !== undefined &&
-      !allowedPronouns.includes(pronouns)
-    ) {
+    if (pronouns !== undefined && !allowedPronouns.includes(pronouns)) {
       return res.status(400).json({
         success: false,
         message: "Please select a valid pronouns option.",
@@ -293,11 +270,9 @@ router.patch("/profile", authMiddleware, async (req, res) => {
 
     if (
       country !== undefined &&
-      (
-        typeof country !== "string" ||
+      (typeof country !== "string" ||
         !country.trim() ||
-        country.trim().length > 100
-      )
+        country.trim().length > 100)
     ) {
       return res.status(400).json({
         success: false,
@@ -310,14 +285,10 @@ router.patch("/profile", authMiddleware, async (req, res) => {
         !preferences ||
         typeof preferences !== "object" ||
         Array.isArray(preferences) ||
-        (
-          preferences.reminders !== undefined &&
-          typeof preferences.reminders !== "boolean"
-        ) ||
-        (
-          preferences.updates !== undefined &&
-          typeof preferences.updates !== "boolean"
-        )
+        (preferences.reminders !== undefined &&
+          typeof preferences.reminders !== "boolean") ||
+        (preferences.updates !== undefined &&
+          typeof preferences.updates !== "boolean")
       ) {
         return res.status(400).json({
           success: false,
@@ -401,7 +372,6 @@ router.patch("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-
 const recoveryMessage =
   "If an account exists for that email, recovery instructions can be sent.";
 
@@ -467,7 +437,7 @@ router.post("/forgot-password", async (req, res) => {
 
     const resetUrl = new URL(
       "/reset-password",
-      frontendUrl.endsWith("/") ? frontendUrl : `${frontendUrl}/`
+      frontendUrl.endsWith("/") ? frontendUrl : `${frontendUrl}/`,
     );
     resetUrl.searchParams.set("token", resetToken);
 
@@ -514,7 +484,8 @@ router.post("/forgot-password", async (req, res) => {
 
       return res.status(502).json({
         success: false,
-        message: "Unable to send recovery email right now. Please try again later.",
+        message:
+          "Unable to send recovery email right now. Please try again later.",
       });
     }
 
@@ -545,13 +516,12 @@ router.post("/reset-password", async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please provide a valid reset link and a password between 8 and 128 characters.",
+        message:
+          "Please provide a valid reset link and a password between 8 and 128 characters.",
       });
     }
 
-    const tokenHash = createHash("sha256")
-      .update(token)
-      .digest("hex");
+    const tokenHash = createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
       passwordResetTokenHash: tokenHash,
@@ -561,7 +531,8 @@ router.post("/reset-password", async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "This reset link is invalid or expired. Please request a new one.",
+        message:
+          "This reset link is invalid or expired. Please request a new one.",
       });
     }
 
@@ -575,7 +546,8 @@ router.post("/reset-password", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Your password has been reset successfully. You can now sign in.",
+      message:
+        "Your password has been reset successfully. You can now sign in.",
     });
   } catch (error) {
     console.error("Reset password error:", error.message);
@@ -586,6 +558,5 @@ router.post("/reset-password", async (req, res) => {
     });
   }
 });
-
 
 export default router;

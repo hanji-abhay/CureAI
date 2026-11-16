@@ -1,9 +1,10 @@
-from pathlib import Path
+ï»¿from pathlib import Path
 
 import joblib
 import pandas as pd
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from schemas import (
     ThyroidInput,
@@ -18,11 +19,21 @@ from schemas import (
 # ==================================================
 
 app = FastAPI(
-    title="OncoSense API",
-    description="AI-assisted cancer risk classification API",
+    title="CureAI API",
+    description="CureAI cancer risk prediction API",
     version="1.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 # ==================================================
 # MODEL PATH
@@ -60,7 +71,7 @@ breast_model = joblib.load(
 @app.get("/")
 def home():
     return {
-        "message": "Welcome to OncoSense API",
+        "message": "Welcome to CureAI API",
         "status": "running"
     }
 
@@ -89,30 +100,32 @@ def predict_thyroid(data: ThyroidInput):
 
 @app.post("/predict/skin")
 def predict_skin(data: SkinInput):
-
     input_data = pd.DataFrame([data.model_dump()])
 
-    boolean_columns = [
+    boolean_fields = [
         "smoke",
         "drink",
         "pesticide",
-        "gender",
         "skin_cancer_history",
         "cancer_history",
         "has_piped_water",
         "has_sewage_system"
     ]
 
-    for column in boolean_columns:
-        input_data[column] = input_data[column].astype(str)
+    for field in boolean_fields:
+        input_data[field] = input_data[field].astype(str)
 
     prediction = skin_model.predict(input_data)[0]
 
     return {
         "cancer_type": "Skin Cancer",
         "prediction": prediction,
-        "message": "This is an AI-assisted preliminary classification, not a medical diagnosis."
+        "message": (
+            "This is an AI-assisted preliminary classification, "
+            "not a medical diagnosis."
+        )
     }
+
 # ==================================================
 # LUNG PREDICTION
 # ==================================================

@@ -1,94 +1,248 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { predictSkin } from "../utils/mlApi";
+import { apiFetch } from "../utils/api";
 
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+const initialModelInputs = {
+  smoke: "",
+  drink: "",
+  background_father: "",
+  background_mother: "",
+  age: "",
+  pesticide: "",
+  gender: "",
+  skin_cancer_history: "",
+  cancer_history: "",
+  has_piped_water: "",
+  has_sewage_system: "",
+  fitspatrick: "",
+  region: "",
+  diameter_1: "",
+  diameter_2: "",
+  itch: "",
+  grew: "",
+  hurt: "",
+  changed: "",
+  bleed: "",
+  elevation: "",
+};
 
-const questions = [
-  { title: 'About your skin', subtitle: 'A little background' },
-  { title: 'Skin changes', subtitle: 'What have you noticed?' },
-  { title: 'Skin history', subtitle: 'Previous care and observations' },
-]
+const booleanOptions = ["True", "False"];
+const symptomOptions = ["FALSE", "TRUE", "UNK"];
 
-const skinChanges = [
-  'A new or changing spot or mole',
-  'A persistent rash',
-  'Itching or irritation',
-  'Dryness or scaling',
-  'A sore that does not seem to heal',
-  'Changes in skin colour',
-  'Bleeding or crusting in a spot',
-  'A change in the size or shape of a mole',
-  'None of these',
-]
+const skinModelSelectFields = [
+  { key: "smoke", label: "Do you smoke?", options: booleanOptions },
+  { key: "drink", label: "Do you consume alcohol?", options: booleanOptions },
+  {
+    key: "background_father",
+    label: "Father's background",
+    options: [
+      "AUSTRIA",
+      "BRASIL",
+      "BRAZIL",
+      "CZECH",
+      "GERMANY",
+      "ISRAEL",
+      "ITALY",
+      "NETHERLANDS",
+      "POLAND",
+      "POMERANIA",
+      "PORTUGAL",
+      "SPAIN",
+      "UNK",
+    ],
+  },
+  {
+    key: "background_mother",
+    label: "Mother's background",
+    options: [
+      "BRAZIL",
+      "FRANCE",
+      "GERMANY",
+      "ITALY",
+      "NETHERLANDS",
+      "NORWAY",
+      "POLAND",
+      "POMERANIA",
+      "PORTUGAL",
+      "SPAIN",
+      "UNK",
+    ],
+  },
+  {
+    key: "pesticide",
+    label: "History of pesticide exposure?",
+    options: booleanOptions,
+  },
+  { key: "gender", label: "Gender", options: ["FEMALE", "MALE"] },
+  {
+    key: "skin_cancer_history",
+    label: "Personal history of skin cancer?",
+    options: booleanOptions,
+  },
+  {
+    key: "cancer_history",
+    label: "Family history of cancer?",
+    options: booleanOptions,
+  },
+  {
+    key: "has_piped_water",
+    label: "Access to piped water?",
+    options: booleanOptions,
+  },
+  {
+    key: "has_sewage_system",
+    label: "Access to a sewage system?",
+    options: booleanOptions,
+  },
+  {
+    key: "region",
+    label: "Lesion location",
+    options: [
+      "ABDOMEN",
+      "ARM",
+      "BACK",
+      "CHEST",
+      "EAR",
+      "FACE",
+      "FOOT",
+      "FOREARM",
+      "HAND",
+      "LIP",
+      "NECK",
+      "NOSE",
+      "SCALP",
+      "THIGH",
+    ],
+  },
+  { key: "itch", label: "Does the lesion itch?", options: symptomOptions },
+  { key: "grew", label: "Has the lesion grown?", options: symptomOptions },
+  { key: "hurt", label: "Does the lesion hurt?", options: symptomOptions },
+  { key: "changed", label: "Has the lesion changed?", options: symptomOptions },
+  { key: "bleed", label: "Does the lesion bleed?", options: symptomOptions },
+  {
+    key: "elevation",
+    label: "Is the lesion elevated?",
+    options: symptomOptions,
+  },
+];
 
-const initialAnswers = {
-  ageGroup: '',
-  skinType: '',
-  changes: [],
-  duration: '',
-  sunExposure: '',
-  familyHistory: '',
-  notes: '',
-}
+const skinModelNumberFields = [
+  { key: "age", label: "Age (years)", step: 1, min: 1 },
+  {
+    key: "fitspatrick",
+    label: "Fitzpatrick skin type (1–6)",
+    step: 1,
+    min: 1,
+    max: 6,
+  },
+  { key: "diameter_1", label: "Lesion diameter 1 (mm)", step: "any", min: 0 },
+  { key: "diameter_2", label: "Lesion diameter 2 (mm)", step: "any", min: 0 },
+];
 
 function SkinAssessment() {
-  const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState(initialAnswers)
-  const [showReview, setShowReview] = useState(false)
+  const [modelInputs, setModelInputs] = useState(initialModelInputs);
+  const [prediction, setPrediction] = useState(null);
+  const [predictionError, setPredictionError] = useState("");
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [saveStatus, setSaveStatus] = useState("");
+  const [saveError, setSaveError] = useState("");
 
-  const updateAnswer = (field, value) => {
-    setAnswers((current) => ({ ...current, [field]: value }))
-  }
+  const updateModelInput = (field, value) => {
+    setModelInputs((current) => ({
+      ...current,
+      [field]: value,
+    }));
 
-  const toggleChange = (change) => {
-    setAnswers((current) => {
-      if (change === 'None of these') {
-        return {
-          ...current,
-          changes: current.changes.includes(change) ? [] : [change],
+    setPrediction(null);
+    setPredictionError("");
+  };
+
+  const handlePrediction = async () => {
+    setPrediction(null);
+    setPredictionError("");
+    setSaveStatus("");
+    setSaveError("");
+
+    const missingFields = Object.entries(modelInputs)
+      .filter(([, value]) => value === "")
+      .map(([field]) => field);
+
+    if (missingFields.length > 0) {
+      setPredictionError(
+        `Please complete all fields before continuing. Missing: ${missingFields.join(", ")}`,
+      );
+      return;
+    }
+
+    const payload = {
+      ...modelInputs,
+      age: Number(modelInputs.age),
+      fitspatrick: Number(modelInputs.fitspatrick),
+      diameter_1: Number(modelInputs.diameter_1),
+      diameter_2: Number(modelInputs.diameter_2),
+      smoke: modelInputs.smoke === "True",
+      drink: modelInputs.drink === "True",
+      pesticide: modelInputs.pesticide === "True",
+      skin_cancer_history: modelInputs.skin_cancer_history === "True",
+      cancer_history: modelInputs.cancer_history === "True",
+      has_piped_water: modelInputs.has_piped_water === "True",
+      has_sewage_system: modelInputs.has_sewage_system === "True",
+    };
+
+    setIsPredicting(true);
+
+    try {
+      const result = await predictSkin(payload);
+      setPrediction(result);
+
+      try {
+        const response = await apiFetch("/api/assessments", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            assessmentType: "skin",
+            answers: payload,
+            prediction: result,
+          }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to save your assessment.");
         }
-      }
 
-      const selected = current.changes.filter(
-        (item) => item !== 'None of these'
-      )
-
-      return {
-        ...current,
-        changes: selected.includes(change)
-          ? selected.filter((item) => item !== change)
-          : [...selected, change],
+        setSaveStatus("Your assessment has been saved successfully.");
+      } catch (error) {
+        setSaveError(
+          error.message ||
+            "Your prediction was generated, but the assessment could not be saved.",
+        );
       }
-    })
-  }
+    } catch (error) {
+      setPredictionError(
+        error.message || "Prediction failed. Please try again.",
+      );
+    } finally {
+      setIsPredicting(false);
+    }
+  };
 
   const restart = () => {
-    setAnswers(initialAnswers)
-    setStep(0)
-    setShowReview(false)
-  }
+    setModelInputs(initialModelInputs);
+    setPrediction(null);
+    setPredictionError("");
+    setIsPredicting(false);
+    setSaveStatus("");
+    setSaveError("");
+  };
 
-  const optionButton = (field, options) => (
-    <div className="skin-option-grid">
-      {options.map((option) => {
-        const selected = answers[field] === option
-
-        return (
-          <button
-            type="button"
-            key={option}
-            className={`skin-option ${selected ? 'selected' : ''}`}
-            aria-pressed={selected}
-            onClick={() => updateAnswer(field, option)}
-          >
-            <span className="skin-indicator">{selected ? '✓' : ''}</span>
-            {option}
-          </button>
-        )
-      })}
-    </div>
-  )
-
-  const progress = showReview ? 100 : ((step + 1) / questions.length) * 100
+  const progress = Object.values(modelInputs).filter(
+    (value) => value !== "",
+  ).length;
 
   return (
     <main className="skin-page">
@@ -111,9 +265,12 @@ function SkinAssessment() {
         }
 
         .skin-page * { box-sizing: border-box; }
-        .skin-page button, .skin-page input, .skin-page textarea, .skin-page select { font: inherit; }
-        .skin-page button:focus-visible, .skin-page a:focus-visible,
-        .skin-page select:focus-visible, .skin-page textarea:focus-visible {
+        .skin-page button, .skin-page input, .skin-page select { font: inherit; }
+
+        .skin-page button:focus-visible,
+        .skin-page a:focus-visible,
+        .skin-page select:focus-visible,
+        .skin-page input:focus-visible {
           outline: 3px solid #bd9279;
           outline-offset: 3px;
         }
@@ -147,7 +304,12 @@ function SkinAssessment() {
           font-weight: 750;
         }
 
-        .skin-brand-name { font-size: 21px; font-weight: 750; letter-spacing: -1px; }
+        .skin-brand-name {
+          font-size: 21px;
+          font-weight: 750;
+          letter-spacing: -1px;
+        }
+
         .skin-brand-tagline {
           display: block;
           margin-top: 2px;
@@ -208,7 +370,10 @@ function SkinAssessment() {
           font-weight: 500;
         }
 
-        .skin-intro h1 span { color: var(--skin-teal); font-style: italic; }
+        .skin-intro h1 span {
+          color: var(--skin-teal);
+          font-style: italic;
+        }
 
         .skin-intro-copy {
           max-width: 370px;
@@ -303,17 +468,17 @@ function SkinAssessment() {
         }
 
         .skin-description {
-          margin: 0 0 30px;
+          margin: 0 0 25px;
           color: var(--skin-muted);
           font-size: 13px;
           line-height: 1.8;
         }
 
-        .skin-field { margin-top: 26px; }
+        .skin-field { min-width: 0; margin-top: 23px; }
 
         .skin-field-label {
           display: block;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
           color: var(--skin-ink);
           font-size: 13px;
           font-weight: 750;
@@ -331,54 +496,13 @@ function SkinAssessment() {
         .skin-option-grid {
           display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
+          gap: 10px 14px;
         }
 
-        .skin-option {
-          min-height: 51px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 12px 13px;
-          border: 1px solid var(--skin-border);
-          border-radius: 12px;
-          background: #fffefa;
-          color: #40544b;
-          cursor: pointer;
-          text-align: left;
-          font-size: 12px;
-          line-height: 1.5;
-          transition: border-color .18s ease, background .18s ease, transform .18s ease;
-        }
-
-        .skin-option:hover { border-color: #d8b09b; transform: translateY(-1px); }
-
-        .skin-option.selected {
-          border-color: #b97c5d;
-          background: #fff2e9;
-          color: var(--skin-deep);
-          box-shadow: inset 0 0 0 1px #b97c5d;
-        }
-
-        .skin-indicator {
-          flex: 0 0 17px;
-          width: 17px;
-          height: 17px;
-          display: grid;
-          place-items: center;
-          border: 1px solid #cbd5cc;
-          border-radius: 50%;
-          color: white;
-          font-size: 10px;
-        }
-
-        .skin-option.selected .skin-indicator {
-          border-color: #a96e51;
-          background: #a96e51;
-        }
-
-        .skin-select, .skin-textarea {
+        .skin-select {
           width: 100%;
+          min-height: 49px;
+          padding: 0 13px;
           border: 1px solid var(--skin-border);
           border-radius: 12px;
           background: #fffefa;
@@ -386,13 +510,15 @@ function SkinAssessment() {
           font-size: 13px;
         }
 
-        .skin-select { min-height: 49px; padding: 0 13px; }
-        .skin-textarea { min-height: 105px; padding: 13px; resize: vertical; line-height: 1.7; }
+        .skin-select:focus {
+          border-color: #b97c5d;
+        }
 
         .skin-form-footer {
           display: flex;
           align-items: center;
           justify-content: space-between;
+          flex-wrap: wrap;
           gap: 12px;
           margin-top: 34px;
           padding-top: 23px;
@@ -417,41 +543,38 @@ function SkinAssessment() {
         .skin-btn:hover { transform: translateY(-1px); }
         .skin-btn-primary { background: var(--skin-deep); color: white; }
         .skin-btn-primary:hover { background: var(--skin-teal); }
-        .skin-btn-secondary { border-color: var(--skin-border); background: white; color: var(--skin-ink); }
+        .skin-btn-secondary {
+          border-color: var(--skin-border);
+          background: white;
+          color: var(--skin-ink);
+        }
         .skin-btn-secondary:hover { background: #f2f5ee; }
-        .skin-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-
-        .skin-optional {
-          margin-top: 17px;
-          color: #89948c;
-          font-size: 11px;
-          line-height: 1.7;
+        .skin-btn:disabled {
+          opacity: .55;
+          cursor: not-allowed;
+          transform: none;
         }
-
-        .skin-review-list { display: grid; }
-
-        .skin-review-row {
-          display: grid;
-          grid-template-columns: minmax(100px, .75fr) minmax(0, 1.25fr);
-          gap: 15px;
-          padding: 15px 0;
-          border-bottom: 1px solid #edf0e9;
-          font-size: 12px;
-          line-height: 1.7;
-        }
-
-        .skin-review-key { color: var(--skin-muted); }
-        .skin-review-value { color: var(--skin-ink); font-weight: 650; overflow-wrap: anywhere; }
 
         .skin-review-notice {
           margin-top: 23px;
-          padding: 16px;
+          padding: 17px;
           border-radius: 13px;
           background: #f8eee7;
           color: #725f55;
           font-size: 12px;
           line-height: 1.8;
+          overflow-wrap: anywhere;
         }
+
+        .skin-review-notice h3 {
+          margin: 0 0 12px;
+          color: var(--skin-ink);
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 23px;
+          font-weight: 500;
+        }
+
+        .skin-review-notice p { margin: 7px 0; }
 
         .skin-footer {
           max-width: 1120px;
@@ -474,7 +597,10 @@ function SkinAssessment() {
             padding-top: 43px;
           }
           .skin-intro { position: static; }
-          .skin-intro h1 { max-width: 570px; font-size: clamp(38px, 8vw, 54px); }
+          .skin-intro h1 {
+            max-width: 570px;
+            font-size: clamp(38px, 8vw, 54px);
+          }
           .skin-intro-copy { max-width: 570px; }
           .skin-note { margin-top: 20px; }
           .skin-progress-card { margin-top: 15px; }
@@ -489,7 +615,6 @@ function SkinAssessment() {
           .skin-layout { padding-top: 32px; padding-bottom: 45px; }
           .skin-form-card { padding: 22px 18px; border-radius: 19px; }
           .skin-option-grid { grid-template-columns: 1fr; }
-          .skin-option { min-height: 47px; }
           .skin-form-footer { align-items: stretch; }
           .skin-btn { padding: 0 13px; }
           .skin-footer { flex-direction: column; gap: 5px; }
@@ -507,13 +632,20 @@ function SkinAssessment() {
 
       <nav className="skin-nav" aria-label="Main navigation">
         <Link className="skin-brand" to="/" aria-label="CureAI home">
-          <span className="skin-brand-mark" aria-hidden="true">C</span>
+          <span className="skin-brand-mark" aria-hidden="true">
+            C
+          </span>
           <span>
             <span className="skin-brand-name">CureAI</span>
-            <span className="skin-brand-tagline">INTELLIGENCE FOR WELLNESS</span>
+            <span className="skin-brand-tagline">
+              INTELLIGENCE FOR WELLNESS
+            </span>
           </span>
         </Link>
-        <Link className="skin-back" to="/">← Back to home</Link>
+
+        <Link className="skin-back" to="/">
+          ← Back to home
+        </Link>
       </nav>
 
       <div className="skin-layout">
@@ -528,9 +660,9 @@ function SkinAssessment() {
           </h1>
 
           <p className="skin-intro-copy">
-            Skin can change for many reasons. This guided questionnaire helps
-            you organize observations about your skin and prepare information
-            you may wish to discuss with a healthcare professional.
+            Provide the information requested by the skin assessment model. Your
+            responses will be processed to generate an AI-assisted
+            classification.
           </p>
 
           <div className="skin-note">
@@ -539,262 +671,201 @@ function SkinAssessment() {
               Your skin deserves attention
             </div>
             <p>
-              This questionnaire cannot identify skin cancer or diagnose a
-              skin condition. A new, changing, bleeding, or non-healing spot
-              should be assessed by a qualified healthcare professional.
+              This tool cannot diagnose skin cancer or identify a skin
+              condition. A new, changing, bleeding, or non-healing spot should
+              be assessed by a qualified healthcare professional.
             </p>
           </div>
 
           <div className="skin-progress-card">
             <div className="skin-progress-label">
-              <span>Your progress</span>
-              <strong>{showReview ? 'Ready to review' : `Step ${step + 1} of ${questions.length}`}</strong>
+              <span>Model inputs completed</span>
+              <strong>{progress} / 21</strong>
             </div>
+
             <div
               className="skin-progress-track"
               role="progressbar"
-              aria-label="Assessment progress"
+              aria-label="Model inputs completed"
               aria-valuemin={0}
-              aria-valuemax={100}
+              aria-valuemax={21}
               aria-valuenow={progress}
             >
-              <div className="skin-progress-fill" style={{ width: `${progress}%` }} />
+              <div
+                className="skin-progress-fill"
+                style={{ width: `${(progress / 21) * 100}%` }}
+              />
             </div>
           </div>
         </aside>
 
         <section className="skin-form-card" aria-live="polite">
-          {!showReview ? (
-            <>
-              <div className="skin-step-label">
-                Step {String(step + 1).padStart(2, '0')} / 03
-              </div>
-              <h2>{questions[step].title}</h2>
-              <p className="skin-description">
-                {questions[step].subtitle}. Share only what you're comfortable sharing.
-              </p>
+          <div className="skin-step-label">AI MODEL ASSESSMENT</div>
 
-              {step === 0 && (
-                <>
-                  <div className="skin-field">
-                    <label className="skin-field-label" htmlFor="skin-age">
-                      Which age group are you in?
-                    </label>
-                    <select
-                      id="skin-age"
-                      className="skin-select"
-                      value={answers.ageGroup}
-                      onChange={(event) => updateAnswer('ageGroup', event.target.value)}
-                    >
-                      <option value="">Select an age range</option>
-                      <option>Under 18</option>
-                      <option>18–29</option>
-                      <option>30–44</option>
-                      <option>45–59</option>
-                      <option>60 or above</option>
-                      <option>Prefer not to say</option>
-                    </select>
-                  </div>
+          <h2>Skin assessment details</h2>
 
-                  <div className="skin-field">
-                    <span className="skin-field-label">
-                      Which description best matches your skin?
-                      <span className="skin-hint">Optional. Choose the closest description.</span>
-                    </span>
-                    {optionButton('skinType', [
-                      'Usually dry',
-                      'Usually oily',
-                      'Combination',
-                      'Sensitive',
-                      'Varies by season',
-                      'Not sure',
-                    ])}
-                  </div>
-                </>
-              )}
+          <p className="skin-description">
+            Complete the fields below using accurate information. All 21 inputs
+            are required by the current trained model. Select UNK where that
+            option is available and the information is unknown.
+          </p>
 
-              {step === 1 && (
-                <>
-                  <div className="skin-field">
-                    <span className="skin-field-label">
-                      Have you noticed any of these changes?
-                      <span className="skin-hint">Select all that apply, or skip if none apply.</span>
-                    </span>
-                    <div className="skin-option-grid">
-                      {skinChanges.map((change) => {
-                        const selected = answers.changes.includes(change)
-                        return (
-                          <button
-                            type="button"
-                            key={change}
-                            className={`skin-option ${selected ? 'selected' : ''}`}
-                            aria-pressed={selected}
-                            onClick={() => toggleChange(change)}
-                          >
-                            <span className="skin-indicator">{selected ? '✓' : ''}</span>
-                            {change}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
+          <div className="skin-review-notice">
+            <strong>Before continuing:</strong> This model produces an
+            educational classification based on its trained data. It does not
+            diagnose skin cancer or replace a professional examination. Do not
+            guess information you do not know.
+          </div>
 
-                  <div className="skin-field">
-                    <label className="skin-field-label" htmlFor="skin-duration">
-                      How long have you noticed the change?
-                    </label>
-                    <select
-                      id="skin-duration"
-                      className="skin-select"
-                      value={answers.duration}
-                      onChange={(event) => updateAnswer('duration', event.target.value)}
-                    >
-                      <option value="">Choose a duration (optional)</option>
-                      <option>Less than two weeks</option>
-                      <option>Two weeks to three months</option>
-                      <option>More than three months</option>
-                      <option>It varies</option>
-                      <option>Not applicable</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  <div className="skin-field">
-                    <span className="skin-field-label">
-                      Do you spend a lot of time outdoors or in direct sunlight?
-                    </span>
-                    {optionButton('sunExposure', [
-                      'Often',
-                      'Sometimes',
-                      'Rarely',
-                      'Not sure',
-                      'Prefer not to say',
-                    ])}
-                  </div>
-
-                  <div className="skin-field">
-                    <span className="skin-field-label">
-                      Is there a family history of significant skin conditions?
-                    </span>
-                    {optionButton('familyHistory', [
-                      'Yes',
-                      'No',
-                      'Not sure',
-                      'Prefer not to say',
-                    ])}
-                  </div>
-
-                  <div className="skin-field">
-                    <label className="skin-field-label" htmlFor="skin-notes">
-                      Anything else you'd like to note?
-                      <span className="skin-hint">Optional. Please avoid entering identifying or highly sensitive information.</span>
-                    </label>
-                    <textarea
-                      id="skin-notes"
-                      className="skin-textarea"
-                      maxLength={500}
-                      placeholder="Add a brief note..."
-                      value={answers.notes}
-                      onChange={(event) => updateAnswer('notes', event.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="skin-form-footer">
-                <button
-                  type="button"
-                  className="skin-btn skin-btn-secondary"
-                  onClick={() => setStep((current) => current - 1)}
-                  disabled={step === 0}
+          <div className="skin-option-grid">
+            {skinModelSelectFields.map(({ key, label, options }) => (
+              <div className="skin-field" key={key}>
+                <label
+                  className="skin-field-label"
+                  htmlFor={`skin-model-${key}`}
                 >
-                  ← Back
-                </button>
+                  {label}
+                </label>
 
-                <button
-                  type="button"
-                  className="skin-btn skin-btn-primary"
-                  onClick={() => {
-                    if (step < questions.length - 1) {
-                      setStep((current) => current + 1)
-                    } else {
-                      setShowReview(true)
-                    }
-                  }}
+                <select
+                  id={`skin-model-${key}`}
+                  className="skin-select"
+                  value={modelInputs[key]}
+                  onChange={(event) =>
+                    updateModelInput(key, event.target.value)
+                  }
+                  required
                 >
-                  {step === questions.length - 1 ? 'Review responses' : 'Continue'} →
-                </button>
+                  <option value="">Select an option</option>
+
+                  {options.map((option) => (
+                    <option key={option} value={option}>
+                      {option === "True"
+                        ? "Yes"
+                        : option === "False"
+                          ? "No"
+                          : option}
+                    </option>
+                  ))}
+                </select>
               </div>
+            ))}
 
-              <p className="skin-optional">
-                This prototype keeps responses in the current page session and does not submit them to a server.
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="skin-step-label">Questionnaire complete</div>
-              <h2>Your observations, gathered in one place.</h2>
-              <p className="skin-description">
-                Review your selections below. You can return to edit them or start again.
-              </p>
-
-              <div className="skin-review-list">
-                {[
-                  ['Age group', answers.ageGroup],
-                  ['Skin description', answers.skinType],
-                  ['Skin changes', answers.changes.join(', ')],
-                  ['Duration', answers.duration],
-                  ['Sun exposure', answers.sunExposure],
-                  ['Family history', answers.familyHistory],
-                  ['Additional notes', answers.notes],
-                ].map(([label, value]) => (
-                  <div className="skin-review-row" key={label}>
-                    <div className="skin-review-key">{label}</div>
-                    <div className="skin-review-value">{value || 'Not provided'}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="skin-review-notice">
-                <strong>Important:</strong> This page has organized your responses only.
-                It has not analyzed an image, diagnosed a condition, or estimated cancer risk.
-                If you are concerned about a new or changing skin lesion, seek assessment from
-                a qualified healthcare professional.
-              </div>
-
-              <div className="skin-form-footer">
-                <button
-                  type="button"
-                  className="skin-btn skin-btn-secondary"
-                  onClick={() => {
-                    setShowReview(false)
-                    setStep(2)
-                  }}
+            {skinModelNumberFields.map(({ key, label, step, min, max }) => (
+              <div className="skin-field" key={key}>
+                <label
+                  className="skin-field-label"
+                  htmlFor={`skin-model-${key}`}
                 >
-                  ← Edit responses
-                </button>
-                <button
-                  type="button"
-                  className="skin-btn skin-btn-primary"
-                  onClick={restart}
-                >
-                  Start again ↻
-                </button>
+                  {label}
+                </label>
+
+                <input
+                  id={`skin-model-${key}`}
+                  className="skin-select"
+                  type="number"
+                  min={min}
+                  max={max}
+                  step={step}
+                  value={modelInputs[key]}
+                  onChange={(event) =>
+                    updateModelInput(key, event.target.value)
+                  }
+                  placeholder="Enter value"
+                  required
+                />
               </div>
-            </>
+            ))}
+          </div>
+
+          {predictionError && (
+            <div className="skin-review-notice" role="alert">
+              {predictionError}
+            </div>
           )}
+
+          {prediction && (
+            <div className="skin-review-notice" aria-live="polite">
+              <h3>Model response</h3>
+              {prediction.cancer_type && (
+                <p>
+                  <strong>Assessment:</strong> {prediction.cancer_type}
+                </p>
+              )}
+              <p>
+                <strong>Predicted class:</strong> {prediction.prediction}
+              </p>
+              {prediction.message && <p>{prediction.message}</p>}
+              <p>
+                This is an AI-generated classification, not a confirmed medical
+                finding or diagnosis. Please consult a qualified healthcare
+                professional for evaluation.
+              </p>
+            </div>
+          )}
+
+          {predictionError && (
+            <div className="skin-error-notice" role="alert">
+              {predictionError}
+            </div>
+          )}
+
+          {saveStatus && (
+            <div className="skin-review-notice" role="status">
+              <strong>✓ Saved to your records</strong>
+              <p>{saveStatus}</p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="skin-review-notice" role="alert">
+              <strong>
+                Your prediction was generated, but it could not be saved.
+              </strong>
+              <p>{saveError}</p>
+            </div>
+          )}
+
+          <div className="skin-form-footer">
+            <button
+              type="button"
+              className="skin-btn skin-btn-secondary"
+              onClick={restart}
+              disabled={isPredicting}
+            >
+              Reset form ↻
+            </button>
+
+            <button
+              type="button"
+              className="skin-btn skin-btn-primary"
+              onClick={handlePrediction}
+              disabled={isPredicting}
+            >
+              {isPredicting ? "Analysing..." : "Run AI assessment →"}
+            </button>
+          </div>
+
+          <p
+            className="skin-description"
+            style={{ marginTop: 18, marginBottom: 0 }}
+          >
+            Your responses are used to request a prediction from the connected
+            assessment API. This result is for educational purposes only.
+          </p>
         </section>
       </div>
 
       <footer className="skin-footer">
-        <span>© {new Date().getFullYear()} CureAI · Intelligence for Wellness</span>
-        <span>Informational support, not a substitute for professional medical care.</span>
+        <span>
+          © {new Date().getFullYear()} CureAI · Intelligence for Wellness
+        </span>
+        <span>
+          Informational support, not a substitute for professional medical care.
+        </span>
       </footer>
     </main>
-  )
+  );
 }
 
-export default SkinAssessment
+export default SkinAssessment;

@@ -1,38 +1,70 @@
-
-import { Link } from 'react-router-dom'
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api";
 
 const assessmentTypes = [
   {
-    id: 'thyroid',
-    name: 'Thyroid',
-    category: 'Endocrine health',
-    icon: '◈',
-    color: 'lavender',
+    id: "thyroid",
+    name: "Thyroid",
+    category: "Endocrine health",
+    icon: "◈",
+    color: "lavender",
   },
   {
-    id: 'skin',
-    name: 'Skin',
-    category: 'Skin health',
-    icon: '✳',
-    color: 'peach',
+    id: "skin",
+    name: "Skin",
+    category: "Skin health",
+    icon: "✳",
+    color: "peach",
   },
   {
-    id: 'lung',
-    name: 'Lung',
-    category: 'Respiratory health',
-    icon: '〰',
-    color: 'blue',
+    id: "lung",
+    name: "Lung",
+    category: "Respiratory health",
+    icon: "〰",
+    color: "blue",
   },
   {
-    id: 'breast',
-    name: 'Breast',
-    category: 'Breast health',
-    icon: '♡',
-    color: 'pink',
+    id: "breast",
+    name: "Breast",
+    category: "Breast health",
+    icon: "♡",
+    color: "pink",
   },
-]
+];
 
 function History() {
+  const [assessments, setAssessments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        setIsLoading(true);
+        setFetchError("");
+
+        const response = await apiFetch("/api/assessments");
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to load assessment history.");
+        }
+
+        setAssessments(data.assessments || []);
+      } catch (error) {
+        console.error("History fetch error:", error);
+        setFetchError(
+          error.message || "Something went wrong while loading history.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, []);
+
   return (
     <div className="cure-history">
       <style>{`
@@ -115,6 +147,82 @@ function History() {
         .ch-button-primary, .ch-button-secondary { display: inline-flex; align-items: center; justify-content: center; padding: 11px 15px; border-radius: 9px; font-size: 11px; font-weight: 750; text-decoration: none; }
         .ch-button-primary { background: var(--ch-green); color: white; }
         .ch-button-secondary { border: 1px solid #dfe5db; background: #fffefa; color: var(--ch-green); }
+        .ch-history-list {
+  padding: 5px 22px;
+}
+
+.ch-history-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 19px 0;
+  border-bottom: 1px solid var(--ch-line);
+}
+
+.ch-history-item:last-child {
+  border-bottom: none;
+}
+
+.ch-history-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: #edf2e9;
+  color: var(--ch-green);
+  font-size: 20px;
+}
+
+.ch-history-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.ch-history-details h3 {
+  margin: 0 0 5px;
+  font-size: 14px;
+}
+
+.ch-history-details p {
+  margin: 4px 0;
+  color: var(--ch-muted);
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+.ch-history-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 8px;
+}
+
+.ch-history-status {
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #edf4e9;
+  color: #54705e;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.ch-history-classification {
+  color: var(--ch-green);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.ch-history-message {
+  padding: 35px 20px;
+  color: var(--ch-muted);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.8;
+}
         .ch-available-heading { margin: 35px 0 17px; }
         .ch-available-heading h2 { margin: 0; font-size: 21px; letter-spacing: -.5px; }
         .ch-available-heading p { margin: 7px 0 0; color: var(--ch-muted); font-size: 11px; line-height: 1.7; }
@@ -133,6 +241,9 @@ function History() {
         .ch-notice strong { color: #315a45; }
         .ch-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 30px; color: #8b978e; font-size: 10px; }
         .ch-footer a { color: #5d7c69; text-decoration: none; }
+        .ch-history-classification {
+  margin-right: 5px;
+}
         @media (max-width: 900px) {
           .ch-assessment-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
@@ -170,13 +281,16 @@ function History() {
         <nav className="ch-header-nav" aria-label="Page navigation">
           <Link to="/">Home</Link>
           <Link to="/profile">My profile</Link>
-          <Link to="/dashboard" className="ch-nav-button">Dashboard ↗</Link>
+          <Link to="/dashboard" className="ch-nav-button">
+            Dashboard ↗
+          </Link>
         </nav>
       </header>
 
       <main className="ch-main">
         <div className="ch-breadcrumb">
-          <Link to="/dashboard">Dashboard</Link> &nbsp;/&nbsp; Assessment history
+          <Link to="/dashboard">Dashboard</Link> &nbsp;/&nbsp; Assessment
+          history
         </div>
 
         <section className="ch-heading">
@@ -184,8 +298,9 @@ function History() {
             <div className="ch-eyebrow">YOUR WELLNESS JOURNEY</div>
             <h1>Assessment history</h1>
             <p>
-              A place for your wellness journey to take shape. Review previous
-              assessments here once secure saving and history storage are connected.
+              Your personal wellness activity timeline. Review completed
+              assessments and revisit the AI-assisted classifications saved
+              securely to your CureAI account.
             </p>
           </div>
 
@@ -200,8 +315,12 @@ function History() {
               <span className="ch-stat-label">Saved assessments</span>
               <span className="ch-stat-icon">▤</span>
             </div>
-            <div className="ch-stat-value">0</div>
-            <div className="ch-stat-note">No saved records in this preview</div>
+            <div className="ch-stat-value">
+              {isLoading ? "..." : assessments.length}
+            </div>
+            <div className="ch-stat-note">
+              Saved records linked to your account
+            </div>
           </article>
 
           <article className="ch-stat">
@@ -210,7 +329,9 @@ function History() {
               <span className="ch-stat-icon">▧</span>
             </div>
             <div className="ch-stat-value">0</div>
-            <div className="ch-stat-note">Report generation is not connected</div>
+            <div className="ch-stat-note">
+              Report downloads are not connected yet
+            </div>
           </article>
 
           <article className="ch-stat">
@@ -219,7 +340,9 @@ function History() {
               <span className="ch-stat-icon">✳</span>
             </div>
             <div className="ch-stat-value">04</div>
-            <div className="ch-stat-note">Questionnaire areas currently available</div>
+            <div className="ch-stat-note">
+              Questionnaire areas currently available
+            </div>
           </article>
         </section>
 
@@ -227,36 +350,97 @@ function History() {
           <div className="ch-section-heading">
             <div>
               <h2 id="ch-history-title">Your activity timeline</h2>
-              <p>Assessment entries will appear here when persistence is implemented.</p>
+              <p>
+                Review your completed assessments and previously saved
+                classifications.
+              </p>
             </div>
-            <span className="ch-mode-label">Preview mode</span>
+            <span className="ch-mode-label">{assessments.length} saved</span>
           </div>
 
           <div className="ch-panel">
             <div className="ch-panel-top">
               <strong>All assessments</strong>
-              <span>Showing saved records</span>
+              <span>{assessments.length} records found</span>
             </div>
 
-            <div className="ch-empty">
-              <div className="ch-empty-illustration" aria-hidden="true">◷</div>
-              <div className="ch-eyebrow">A FRESH START</div>
-              <h3>Your timeline starts here</h3>
-              <p>
-                You don't have any saved assessment records in this prototype.
-                Explore a questionnaire to see how the experience works.
-                Completed answers are not saved to a database yet.
-              </p>
-
-              <div className="ch-empty-actions">
-                <Link to="/dashboard" className="ch-button-primary">
-                  Go to dashboard&nbsp; ↗
-                </Link>
-                <Link to="/reports" className="ch-button-secondary">
-                  View reports
-                </Link>
+            {isLoading ? (
+              <div className="ch-history-message">
+                Loading your assessment history...
               </div>
-            </div>
+            ) : fetchError ? (
+              <div className="ch-history-message" role="alert">
+                <strong>Unable to load your history.</strong>
+                <p>{fetchError}</p>
+              </div>
+            ) : assessments.length === 0 ? (
+              <div className="ch-empty">
+                <div className="ch-empty-illustration" aria-hidden="true">
+                  ◷
+                </div>
+                <div className="ch-eyebrow">A FRESH START</div>
+                <h3>Your timeline starts here</h3>
+                <p>
+                  You don't have any saved assessment records yet. Explore a
+                  questionnaire to begin your wellness journey.
+                </p>
+
+                <div className="ch-empty-actions">
+                  <Link to="/dashboard" className="ch-button-primary">
+                    Go to dashboard&nbsp; ↗
+                  </Link>
+                  <Link to="/reports" className="ch-button-secondary">
+                    View reports
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="ch-history-list">
+                {assessments.map((assessment) => {
+                  const type = assessment.assessmentType;
+                  const category = assessmentTypes.find(
+                    (item) => item.id === type,
+                  );
+
+                  const classification =
+                    assessment.prediction?.prediction ?? "Not available";
+
+                  const completedDate = assessment.createdAt
+                    ? new Date(assessment.createdAt).toLocaleString()
+                    : "Date unavailable";
+
+                  return (
+                    <article
+                      className="ch-history-item"
+                      key={assessment._id || assessment.id}
+                    >
+                      <div className="ch-history-icon">
+                        {category?.icon || "◈"}
+                      </div>
+
+                      <div className="ch-history-details">
+                        <h3>{category?.name || type} Assessment</h3>
+
+                        <p>
+                          {assessment.prediction?.cancer_type || "Assessment"} ·
+                          Completed: {completedDate}
+                        </p>
+
+                        <div className="ch-history-meta">
+                          <span className="ch-history-classification">
+                            Classification: {String(classification)}
+                          </span>
+
+                          <span className="ch-history-status">
+                            {assessment.status || "completed"}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </section>
 
@@ -278,7 +462,9 @@ function History() {
                 </span>
                 <h3>{assessment.name}</h3>
                 <p>{assessment.category}</p>
-                <span className="ch-assessment-cta">Open questionnaire&nbsp; ↗</span>
+                <span className="ch-assessment-cta">
+                  Open questionnaire&nbsp; ↗
+                </span>
               </Link>
             ))}
           </div>
@@ -287,16 +473,18 @@ function History() {
         <aside className="ch-notice">
           <span aria-hidden="true">ⓘ</span>
           <span>
-            <strong>About your information:</strong> This page is a frontend
-            prototype. It does not retrieve, save, or display real medical
-            records. CureAI questionnaires are informational and do not provide
-            a diagnosis. Consult a qualified healthcare professional about
-            health concerns.
+            <strong>About your information:</strong> Your completed assessments
+            are retrieved from your authenticated CureAI account. The
+            classifications are AI-assisted preliminary outputs, not medical
+            diagnoses. Consult a qualified healthcare professional for medical
+            evaluation.
           </span>
         </aside>
 
         <footer className="ch-footer">
-          <span>© {new Date().getFullYear()} CureAI · Intelligence for Wellness</span>
+          <span>
+            © {new Date().getFullYear()} CureAI · Intelligence for Wellness
+          </span>
           <span>
             <Link to="/profile">Profile</Link>
             &nbsp; · &nbsp;
@@ -305,7 +493,7 @@ function History() {
         </footer>
       </main>
     </div>
-  )
+  );
 }
 
-export default History
+export default History;

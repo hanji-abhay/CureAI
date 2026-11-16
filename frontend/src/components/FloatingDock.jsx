@@ -1,46 +1,45 @@
-
-import { useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 
 const groups = [
   {
-    title: 'OVERVIEW',
+    title: "OVERVIEW",
     items: [
-      { label: 'Home', path: '/', icon: 'home' },
-      { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
+      { label: "Home", path: "/", icon: "home" },
+      { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
     ],
   },
   {
-    title: 'ASSESSMENTS',
+    title: "ASSESSMENTS",
     items: [
-      { label: 'Thyroid', path: '/assessments/thyroid', icon: 'thyroid' },
-      { label: 'Skin', path: '/assessments/skin', icon: 'skin' },
-      { label: 'Lung', path: '/assessments/lung', icon: 'lung' },
-      { label: 'Breast', path: '/assessments/breast', icon: 'breast' },
+      { label: "Thyroid", path: "/assessments/thyroid", icon: "thyroid" },
+      { label: "Skin", path: "/assessments/skin", icon: "skin" },
+      { label: "Lung", path: "/assessments/lung", icon: "lung" },
+      { label: "Breast", path: "/assessments/breast", icon: "breast" },
     ],
   },
   {
-    title: 'YOUR SPACE',
+    title: "YOUR SPACE",
     items: [
-      { label: 'History', path: '/history', icon: 'history' },
-      { label: 'Reports', path: '/reports', icon: 'reports' },
-      { label: 'Profile', path: '/profile', icon: 'profile' },
+      { label: "History", path: "/history", icon: "history" },
+      { label: "Reports", path: "/reports", icon: "reports" },
+      { label: "Profile", path: "/profile", icon: "profile" },
     ],
   },
-]
+];
 
 function DockIcon({ name, size = 19 }) {
   const common = {
     width: size,
     height: size,
-    viewBox: '0 0 24 24',
-    fill: 'none',
-    stroke: 'currentColor',
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
     strokeWidth: 1.7,
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
-    'aria-hidden': true,
-  }
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  };
 
   const paths = {
     home: (
@@ -124,48 +123,48 @@ function DockIcon({ name, size = 19 }) {
         <path d="M15 4v16M7 9h3M7 13h3" />
       </>
     ),
-  }
+  };
 
-  return <svg {...common}>{paths[name] || paths.home}</svg>
+  return <svg {...common}>{paths[name] || paths.home}</svg>;
 }
 
 function FloatingDock() {
-  const [hovered, setHovered] = useState(false)
-  const [pinned, setPinned] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
-  const [wide, setWide] = useState(false)
-  const location = useLocation()
+  const [hovered, setHovered] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [wide, setWide] = useState(false);
+  const location = useLocation();
 
-  const expanded = pinned || (hovered && !dismissed)
+  const expanded = pinned || (hovered && !dismissed);
 
   const authPaths = [
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
-  ]
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+  ];
 
-  if (authPaths.includes(location.pathname)) return null
+  if (authPaths.includes(location.pathname)) return null;
 
   function handleTriggerClick() {
     if (pinned || (hovered && !dismissed)) {
-      setPinned(false)
-      setDismissed(true)
-      setHovered(false)
+      setPinned(false);
+      setDismissed(true);
+      setHovered(false);
     } else {
-      setPinned(true)
-      setDismissed(false)
+      setPinned(true);
+      setDismissed(false);
     }
   }
 
   return (
     <div
-      className={`cure-dock ${expanded ? 'is-expanded' : ''} ${
-        wide ? 'is-wide' : ''
+      className={`cure-dock ${expanded ? "is-expanded" : ""} ${
+        wide ? "is-wide" : ""
       }`}
       onMouseLeave={() => {
-        setHovered(false)
-        setDismissed(false)
+        setHovered(false);
+        setDismissed(false);
       }}
     >
       <style>{`
@@ -505,11 +504,13 @@ function FloatingDock() {
             type="button"
             className="cure-dock-expand"
             onClick={() => setWide((current) => !current)}
-            aria-label={wide ? 'Collapse sidebar labels' : 'Expand sidebar labels'}
+            aria-label={
+              wide ? "Collapse sidebar labels" : "Expand sidebar labels"
+            }
             aria-pressed={wide}
-            title={wide ? 'Collapse sidebar' : 'Expand sidebar'}
+            title={wide ? "Collapse sidebar" : "Expand sidebar"}
           >
-            <DockIcon name={wide ? 'collapse' : 'expand'} size={17} />
+            <DockIcon name={wide ? "collapse" : "expand"} size={17} />
           </button>
         </div>
 
@@ -521,17 +522,17 @@ function FloatingDock() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === "/"}
                 tabIndex={expanded ? 0 : -1}
                 className={({ isActive }) =>
-                  `cure-dock-link ${isActive ? 'active' : ''}`
+                  `cure-dock-link ${isActive ? "active" : ""}`
                 }
                 aria-label={item.label}
                 title={wide ? undefined : item.label}
                 onClick={() => {
-                  setPinned(false)
-                  setHovered(false)
-                  setDismissed(false)
+                  setPinned(false);
+                  setHovered(false);
+                  setDismissed(false);
                 }}
               >
                 <DockIcon name={item.icon} />
@@ -547,18 +548,18 @@ function FloatingDock() {
         type="button"
         className="cure-dock-trigger"
         onMouseEnter={() => {
-          if (!pinned && !dismissed) setHovered(true)
+          if (!pinned && !dismissed) setHovered(true);
         }}
         onClick={handleTriggerClick}
-        aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'}
+        aria-label={expanded ? "Collapse navigation" : "Expand navigation"}
         aria-expanded={expanded}
-        title={expanded ? 'Collapse navigation' : 'Open navigation'}
+        title={expanded ? "Collapse navigation" : "Open navigation"}
       >
-        <DockIcon name={expanded ? 'close' : 'menu'} size={25} />
+        <DockIcon name={expanded ? "close" : "menu"} size={25} />
         {pinned && <span className="cure-dock-pin" />}
       </button>
     </div>
-  )
+  );
 }
 
-export default FloatingDock
+export default FloatingDock;

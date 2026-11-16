@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const assessmentSchema = new mongoose.Schema(
@@ -16,7 +15,14 @@ const assessmentSchema = new mongoose.Schema(
       enum: ["thyroid", "skin", "lung", "breast"],
     },
 
+    // Exact inputs submitted to the ML model.
     answers: {
+      type: mongoose.Schema.Types.Mixed,
+      required: true,
+    },
+
+    // Complete response returned by the ML prediction API.
+    prediction: {
       type: mongoose.Schema.Types.Mixed,
       required: true,
     },
@@ -29,7 +35,7 @@ const assessmentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 assessmentSchema.index({ user: 1, createdAt: -1 });

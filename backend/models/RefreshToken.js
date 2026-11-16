@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const refreshTokenSchema = new mongoose.Schema(
@@ -30,7 +29,7 @@ const refreshTokenSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const RefreshToken = mongoose.model("RefreshToken", refreshTokenSchema);

@@ -1,4 +1,3 @@
-
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 let accessToken = null;
@@ -13,14 +12,12 @@ export function getAccessToken() {
 }
 
 export function saveUser(user) {
-  sessionStorage.setItem('cureai-user', JSON.stringify(user));
+  sessionStorage.setItem("cureai-user", JSON.stringify(user));
 }
 
 export function getSavedUser() {
   try {
-    return JSON.parse(
-      sessionStorage.getItem('cureai-user') || 'null'
-    );
+    return JSON.parse(sessionStorage.getItem("cureai-user") || "null");
   } catch {
     return null;
   }
@@ -28,8 +25,8 @@ export function getSavedUser() {
 
 export function clearAuth() {
   accessToken = null;
-  sessionStorage.removeItem('cureai-token');
-  sessionStorage.removeItem('cureai-user');
+  sessionStorage.removeItem("cureai-token");
+  sessionStorage.removeItem("cureai-user");
 }
 
 function requestSessionRefresh() {
@@ -40,8 +37,8 @@ function requestSessionRefresh() {
   refreshPromise = (async () => {
     try {
       const response = await fetch(`${API_URL}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
+        method: "POST",
+        credentials: "include",
       });
 
       const data = await response.json().catch(() => ({}));
@@ -50,7 +47,7 @@ function requestSessionRefresh() {
         clearAuth();
 
         return {
-          status: 'unauthenticated',
+          status: "unauthenticated",
           token: null,
           user: null,
         };
@@ -58,7 +55,7 @@ function requestSessionRefresh() {
 
       if (!response.ok || !data.success || !data.token) {
         return {
-          status: 'unavailable',
+          status: "unavailable",
           token: null,
           user: null,
         };
@@ -68,7 +65,7 @@ function requestSessionRefresh() {
 
       if (!user) {
         return {
-          status: 'unavailable',
+          status: "unavailable",
           token: null,
           user: null,
         };
@@ -78,13 +75,13 @@ function requestSessionRefresh() {
       saveUser(user);
 
       return {
-        status: 'authenticated',
+        status: "authenticated",
         token: data.token,
         user,
       };
     } catch {
       return {
-        status: 'unavailable',
+        status: "unavailable",
         token: null,
         user: null,
       };
@@ -99,9 +96,7 @@ function requestSessionRefresh() {
 export async function refreshAccessToken() {
   const result = await requestSessionRefresh();
 
-  return result.status === 'authenticated'
-    ? result.token
-    : null;
+  return result.status === "authenticated" ? result.token : null;
 }
 
 export async function restoreSession() {
@@ -120,21 +115,21 @@ export async function apiFetch(path, options = {}) {
     const headers = new Headers(options.headers || {});
 
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     } else {
-      headers.delete('Authorization');
+      headers.delete("Authorization");
     }
 
     return fetch(url, {
       ...options,
       headers,
-      credentials: 'include',
+      credentials: "include",
     });
   };
 
   let token = getAccessToken();
 
-  if (!token && !path.startsWith('/api/auth/refresh')) {
+  if (!token && !path.startsWith("/api/auth/refresh")) {
     token = await refreshAccessToken();
   }
 
@@ -154,8 +149,8 @@ export async function apiFetch(path, options = {}) {
 export async function logoutSession() {
   try {
     await fetch(`${API_URL}/api/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
+      method: "POST",
+      credentials: "include",
     });
   } finally {
     clearAuth();

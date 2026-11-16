@@ -1,63 +1,63 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth.js";
 
 function Login() {
-  const { login } = useAuth()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(true)
-  const [message, setMessage] = useState('')
-  const navigate = useNavigate()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-async function handleSubmit(event) {
-  event.preventDefault()
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-  if (isSubmitting) return
+    if (isSubmitting) return;
 
-  setMessage('')
-  setIsSubmitting(true)
+    setMessage("");
+    setIsSubmitting(true);
 
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+            rememberMe,
+          }),
         },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          rememberMe,
-        }),
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success || !data.token || !data.user) {
+        setMessage(data.message || "Unable to sign in. Please try again.");
+        return;
       }
-    )
 
-    const data = await response.json().catch(() => ({}))
+      // Update the shared authentication state and save the user.
+      login(data.token, data.user);
 
-    if (!response.ok || !data.success || !data.token || !data.user) {
-      setMessage(data.message || 'Unable to sign in. Please try again.')
-      return
+      setMessage("Login successful! Redirecting...");
+
+      navigate("/dashboard", { replace: true });
+    } catch {
+      setMessage(
+        "Could not connect to CureAI. Please check that the backend is running.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Update the shared authentication state and save the user.
-    login(data.token, data.user)
-
-    setMessage('Login successful! Redirecting...')
-
-    navigate('/dashboard', { replace: true })
-  } catch {
-    setMessage(
-      'Could not connect to CureAI. Please check that the backend is running.'
-    )
-  } finally {
-    setIsSubmitting(false)
   }
-}
   return (
     <main className="login-page">
       <style>{`
@@ -598,7 +598,9 @@ async function handleSubmit(event) {
 
       <section className="login-showcase">
         <Link to="/" className="login-brand">
-          <span className="login-brand-symbol" aria-hidden="true">✳</span>
+          <span className="login-brand-symbol" aria-hidden="true">
+            ✳
+          </span>
           <span>
             Cure<span className="login-brand-ai">AI</span>
           </span>
@@ -617,9 +619,8 @@ async function handleSubmit(event) {
           </h1>
 
           <p className="login-showcase-copy">
-            A thoughtful space to explore health information, organise
-            your observations, and take more informed steps toward
-            wellbeing.
+            A thoughtful space to explore health information, organise your
+            observations, and take more informed steps toward wellbeing.
           </p>
 
           <div className="login-orbit" aria-hidden="true">
@@ -642,7 +643,9 @@ async function handleSubmit(event) {
       <section className="login-form-side">
         <div className="login-form-wrap">
           <Link to="/" className="login-mobile-brand">
-            <span className="login-brand-symbol" aria-hidden="true">✳</span>
+            <span className="login-brand-symbol" aria-hidden="true">
+              ✳
+            </span>
             <span>
               Cure<span className="login-brand-ai">AI</span>
             </span>
@@ -667,8 +670,8 @@ async function handleSubmit(event) {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(event) => {
-                  setEmail(event.target.value)
-                  setMessage('')
+                  setEmail(event.target.value);
+                  setMessage("");
                 }}
                 required
               />
@@ -681,13 +684,13 @@ async function handleSubmit(event) {
                 <input
                   id="login-password"
                   className="login-input login-password-input"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(event) => {
-                    setPassword(event.target.value)
-                    setMessage('')
+                    setPassword(event.target.value);
+                    setMessage("");
                   }}
                   required
                 />
@@ -696,9 +699,9 @@ async function handleSubmit(event) {
                   type="button"
                   className="login-password-toggle"
                   onClick={() => setShowPassword((value) => !value)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
@@ -713,10 +716,7 @@ async function handleSubmit(event) {
                 Remember me
               </label>
 
-              <Link
-                to="/forgot-password"
-                className="login-text-link"
-              >
+              <Link to="/forgot-password" className="login-text-link">
                 Forgot password?
               </Link>
             </div>
@@ -726,10 +726,8 @@ async function handleSubmit(event) {
               className="login-submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
-              {!isSubmitting && (
-                <span className="login-submit-arrow">→</span>
-              )}
+              {isSubmitting ? "Signing in..." : "Sign in"}
+              {!isSubmitting && <span className="login-submit-arrow">→</span>}
             </button>
 
             {message && (
@@ -742,16 +740,17 @@ async function handleSubmit(event) {
           <div className="login-divider">NEW TO CUREAI?</div>
 
           <p className="login-register-prompt">
-            Don't have an account?{' '}
-            <Link to="/register">Create an account</Link>
+            Don't have an account? <Link to="/register">Create an account</Link>
           </p>
 
           <div className="login-privacy-note">
-            <span className="login-privacy-icon" aria-hidden="true">♧</span>
+            <span className="login-privacy-icon" aria-hidden="true">
+              ♧
+            </span>
             <span>
-              Your health journey deserves care and respect. This interface
-              is a frontend prototype; secure account authentication and
-              data storage must be implemented before handling real user data.
+              Your health journey deserves care and respect. This interface is a
+              frontend prototype; secure account authentication and data storage
+              must be implemented before handling real user data.
             </span>
           </div>
 
@@ -761,7 +760,7 @@ async function handleSubmit(event) {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
-export default Login
+export default Login;

@@ -1,141 +1,139 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { apiFetch } from '../utils/api.js'
-import { useAuth } from '../context/AuthContext.jsx'
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { apiFetch } from "../utils/api.js";
+import { useAuth } from "../context/useAuth.js";
 
 const defaultProfile = {
-  name: '',
-  email: '',
-  dateOfBirth: '',
-  pronouns: '',
-  country: 'India',
-}
+  name: "",
+  email: "",
+  dateOfBirth: "",
+  pronouns: "",
+  country: "India",
+};
 
 const defaultPreferences = {
   reminders: false,
   updates: true,
-}
+};
 
 function Profile() {
-  const navigate = useNavigate()
-  const { updateUser, logout } = useAuth()
-  const [profile, setProfile] = useState(defaultProfile)
-  const [preferences, setPreferences] = useState(defaultPreferences)
-  const [message, setMessage] = useState('')
-  const [messageType, setMessageType] = useState('success')
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  const navigate = useNavigate();
+  const { updateUser, logout } = useAuth();
+  const [profile, setProfile] = useState(defaultProfile);
+  const [preferences, setPreferences] = useState(defaultPreferences);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  
   const redirectToLogin = useCallback(async () => {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Session cleanup failed:', error)
+      console.error("Session cleanup failed:", error);
     }
 
-    navigate('/login', { replace: true })
-  }, [logout, navigate])
+    navigate("/login", { replace: true });
+  }, [logout, navigate]);
 
-  function syncUser(user) {
-    updateUser({
-      id: user.id,
-      fullName: user.fullName,
-      email: user.email,
-    })
-  }
+  const applyProfile = useCallback(
+    (user) => {
+      setProfile({
+        name: user.fullName || "",
+        email: user.email || "",
+        dateOfBirth: user.dateOfBirth || "",
+        pronouns: user.pronouns || "",
+        country: user.country || "India",
+      });
 
-  function applyProfile(user) {
-    setProfile({
-      name: user.fullName || '',
-      email: user.email || '',
-      dateOfBirth: user.dateOfBirth || '',
-      pronouns: user.pronouns || '',
-      country: user.country || 'India',
-    })
+      setPreferences({
+        reminders: user.preferences?.reminders ?? false,
+        updates: user.preferences?.updates ?? true,
+      });
 
-    setPreferences({
-      reminders: user.preferences?.reminders ?? false,
-      updates: user.preferences?.updates ?? true,
-    })
-
-    syncUser(user)
-  }
+      updateUser({
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+      });
+    },
+    [updateUser],
+  );
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
 
     async function loadProfile() {
       try {
-        const response = await apiFetch('/api/auth/me')
-        const data = await response.json().catch(() => ({}))
+        const response = await apiFetch("/api/auth/me");
+        const data = await response.json().catch(() => ({}));
 
         if (response.status === 401) {
-          await redirectToLogin()
-          return
+          await redirectToLogin();
+          return;
         }
 
         if (!response.ok || !data.success || !data.user) {
-          throw new Error(data.message || 'Unable to load your profile.')
+          throw new Error(data.message || "Unable to load your profile.");
         }
 
-        if (cancelled) return
+        if (cancelled) return;
 
-        applyProfile(data.user)
+        applyProfile(data.user);
       } catch (error) {
         if (!cancelled) {
           setMessage(
-            error.message || 'Unable to connect to CureAI. Please try again.'
-          )
-          setMessageType('error')
+            error.message || "Unable to connect to CureAI. Please try again.",
+          );
+          setMessageType("error");
         }
       } finally {
-        if (!cancelled) setIsLoading(false)
+        if (!cancelled) setIsLoading(false);
       }
     }
 
-    loadProfile()
+    loadProfile();
 
     return () => {
-      cancelled = true
-    }
-  }, [redirectToLogin])
+      cancelled = true;
+    };
+  }, [applyProfile, redirectToLogin]);
 
   function handleChange(event) {
-    const { name, value } = event.target
+    const { name, value } = event.target;
 
     setProfile((current) => ({
       ...current,
       [name]: value,
-    }))
+    }));
 
-    setMessage('')
+    setMessage("");
   }
 
   function handlePreferenceChange(event) {
-    const { name, checked } = event.target
+    const { name, checked } = event.target;
 
     setPreferences((current) => ({
       ...current,
       [name]: checked,
-    }))
+    }));
 
-    setMessage('')
+    setMessage("");
   }
 
   async function handleSubmit(event) {
-    event.preventDefault()
+    event.preventDefault();
 
-    if (isSaving || isLoading) return
+    if (isSaving || isLoading) return;
 
-    setIsSaving(true)
-    setMessage('')
+    setIsSaving(true);
+    setMessage("");
 
     try {
-      const response = await apiFetch('/api/auth/profile', {
-        method: 'PATCH',
+      const response = await apiFetch("/api/auth/profile", {
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           fullName: profile.name.trim(),
@@ -145,61 +143,61 @@ function Profile() {
           country: profile.country,
           preferences,
         }),
-      })
+      });
 
-      const data = await response.json().catch(() => ({}))
+      const data = await response.json().catch(() => ({}));
 
       if (response.status === 401) {
-        await redirectToLogin()
-        return
+        await redirectToLogin();
+        return;
       }
 
       if (!response.ok || !data.success || !data.user) {
-        throw new Error(data.message || 'Unable to save your profile.')
+        throw new Error(data.message || "Unable to save your profile.");
       }
 
-      applyProfile(data.user)
+      applyProfile(data.user);
 
-      setMessage(data.message || 'Your profile has been saved successfully.')
-      setMessageType('success')
+      setMessage(data.message || "Your profile has been saved successfully.");
+      setMessageType("success");
     } catch (error) {
       setMessage(
-        error.message || 'Unable to save your profile. Please try again.'
-      )
-      setMessageType('error')
+        error.message || "Unable to save your profile. Please try again.",
+      );
+      setMessageType("error");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 
   async function handleReset() {
-    setMessage('')
+    setMessage("");
 
     try {
-      const response = await apiFetch('/api/auth/me')
-      const data = await response.json().catch(() => ({}))
+      const response = await apiFetch("/api/auth/me");
+      const data = await response.json().catch(() => ({}));
 
       if (response.status === 401) {
-        await redirectToLogin()
-        return
+        await redirectToLogin();
+        return;
       }
 
       if (!response.ok || !data.success || !data.user) {
         throw new Error(
-          data.message || 'Unable to restore your saved profile.'
-        )
+          data.message || "Unable to restore your saved profile.",
+        );
       }
 
-      applyProfile(data.user)
+      applyProfile(data.user);
 
-      setMessage('Your saved profile has been restored.')
-      setMessageType('success')
+      setMessage("Your saved profile has been restored.");
+      setMessageType("success");
     } catch (error) {
-      setMessage(error.message || 'Unable to restore your profile.')
-      setMessageType('error')
+      setMessage(error.message || "Unable to restore your profile.");
+      setMessageType("error");
     }
   }
-  
+
   return (
     <div className="cure-profile">
       <style>{`
@@ -324,8 +322,8 @@ function Profile() {
           <div className="cp-eyebrow">YOUR ACCOUNT</div>
           <h1>Your profile</h1>
           <p>
-            Make your wellness space your own. Manage your personal details
-            and preferences in one place.
+            Make your wellness space your own. Manage your personal details and
+            preferences in one place.
           </p>
         </div>
 
@@ -333,17 +331,20 @@ function Profile() {
           <aside>
             <section className="cp-card cp-identity">
               <div className="cp-avatar" aria-hidden="true">
-                {profile.name.trim().charAt(0).toUpperCase() || '♡'}
+                {profile.name.trim().charAt(0).toUpperCase() || "♡"}
               </div>
-              <h2>{profile.name.trim() || 'Your name'}</h2>
-              <p>{profile.email || 'Your email address'}</p>
+              <h2>{profile.name.trim() || "Your name"}</h2>
+              <p>{profile.email || "Your email address"}</p>
               <span className="cp-status">
                 <span className="cp-status-dot" />
-                {isLoading ? 'Loading profile' : 'Signed-in account'}
+                {isLoading ? "Loading profile" : "Signed-in account"}
               </span>
             </section>
 
-            <nav className="cp-card cp-side-links" aria-label="Profile sections">
+            <nav
+              className="cp-card cp-side-links"
+              aria-label="Profile sections"
+            >
               <a href="#personal-details" className="cp-selected">
                 <span className="cp-side-icon">◎</span>
                 Personal details
@@ -364,7 +365,8 @@ function Profile() {
 
             <p className="cp-side-note">
               ✳ &nbsp; Your wellbeing comes first. Only enter real health
-              information once secure storage and authentication are implemented.
+              information once secure storage and authentication are
+              implemented.
             </p>
           </aside>
 
@@ -374,12 +376,12 @@ function Profile() {
                 <h2>Personal information</h2>
                 <p>
                   {isLoading
-                    ? 'Loading your account details...'
-                    : 'Your profile details and preferences are saved to your account.'}
+                    ? "Loading your account details..."
+                    : "Your profile details and preferences are saved to your account."}
                 </p>
               </div>
               <span className="cp-status">
-                {isLoading ? 'Loading' : 'Account profile'}
+                {isLoading ? "Loading" : "Account profile"}
               </span>
             </div>
 
@@ -523,14 +525,15 @@ function Profile() {
               <span>
                 <strong>Account security.</strong> These settings are saved to
                 your authenticated CureAI account. Avoid storing sensitive
-                medical information until the relevant features are securely implemented.
+                medical information until the relevant features are securely
+                implemented.
               </span>
             </div>
 
             {message && (
               <div
-                className={`cp-message ${messageType === 'error' ? 'cp-message-error' : ''}`}
-                role={messageType === 'error' ? 'alert' : 'status'}
+                className={`cp-message ${messageType === "error" ? "cp-message-error" : ""}`}
+                role={messageType === "error" ? "alert" : "status"}
               >
                 {message}
               </div>
@@ -551,14 +554,16 @@ function Profile() {
                 type="submit"
                 disabled={isLoading || isSaving}
               >
-                {isSaving ? 'Saving...' : 'Save profile ↗'}
+                {isSaving ? "Saving..." : "Save profile ↗"}
               </button>
             </div>
           </form>
         </div>
 
         <footer className="cp-footer">
-          <span>© {new Date().getFullYear()} CureAI · Intelligence for Wellness</span>
+          <span>
+            © {new Date().getFullYear()} CureAI · Intelligence for Wellness
+          </span>
           <span>
             <Link to="/">Home</Link> &nbsp;·&nbsp;
             <Link to="/dashboard">Dashboard</Link>
@@ -566,7 +571,7 @@ function Profile() {
         </footer>
       </main>
     </div>
-  )
+  );
 }
 
-export default Profile
+export default Profile;

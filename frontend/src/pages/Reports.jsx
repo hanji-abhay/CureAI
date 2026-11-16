@@ -1,79 +1,128 @@
+import { useMemo, useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { apiFetch } from "../utils/api";
 
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-
-const reportCategories = [
-  'All reports',
-  'Thyroid',
-  'Skin',
-  'Lung',
-  'Breast',
-]
+const reportCategories = ["All reports", "Thyroid", "Skin", "Lung", "Breast"];
 
 const reportTypes = [
   {
-    id: 'thyroid',
-    title: 'Thyroid assessment',
+    id: "thyroid",
+    title: "Thyroid assessment",
     description:
-      'A guided questionnaire covering thyroid-related symptoms and health history.',
-    category: 'Thyroid',
-    icon: '◈',
-    color: 'lavender',
-    route: '/assessments/thyroid',
+      "A guided questionnaire covering thyroid-related symptoms and health history.",
+    category: "Thyroid",
+    icon: "◈",
+    color: "lavender",
+    route: "/assessments/thyroid",
   },
   {
-    id: 'skin',
-    title: 'Skin assessment',
+    id: "skin",
+    title: "Skin assessment",
     description:
-      'A structured record of skin changes, their duration, and relevant history.',
-    category: 'Skin',
-    icon: '✳',
-    color: 'peach',
-    route: '/assessments/skin',
+      "A structured record of skin changes, their duration, and relevant history.",
+    category: "Skin",
+    icon: "✳",
+    color: "peach",
+    route: "/assessments/skin",
   },
   {
-    id: 'lung',
-    title: 'Lung assessment',
+    id: "lung",
+    title: "Lung assessment",
     description:
-      'A questionnaire for respiratory symptoms, exposure, and health history.',
-    category: 'Lung',
-    icon: '〰',
-    color: 'blue',
-    route: '/assessments/lung',
+      "A questionnaire for respiratory symptoms, exposure, and health history.",
+    category: "Lung",
+    icon: "〰",
+    color: "blue",
+    route: "/assessments/lung",
   },
   {
-    id: 'breast',
-    title: 'Breast assessment',
+    id: "breast",
+    title: "Breast assessment",
     description:
-      'A guided record of breast changes and relevant personal or family history.',
-    category: 'Breast',
-    icon: '♡',
-    color: 'pink',
-    route: '/assessments/breast',
+      "A guided record of breast changes and relevant personal or family history.",
+    category: "Breast",
+    icon: "♡",
+    color: "pink",
+    route: "/assessments/breast",
   },
-]
+];
 
 function Reports() {
-  const [activeCategory, setActiveCategory] = useState('All reports')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState("All reports");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [savedAssessments, setSavedAssessments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    const fetchAssessments = async () => {
+      try {
+        setIsLoading(true);
+        setFetchError("");
+
+        const response = await apiFetch("/api/assessments");
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Unable to load your saved assessments.",
+          );
+        }
+
+        setSavedAssessments(data.assessments || []);
+      } catch (error) {
+        setFetchError(
+          error.message || "Something went wrong while loading your records.",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssessments();
+  }, []);
 
   const filteredTypes = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase()
+    const query = searchQuery.trim().toLowerCase();
 
     return reportTypes.filter((report) => {
       const matchesCategory =
-        activeCategory === 'All reports' ||
-        report.category === activeCategory
+        activeCategory === "All reports" || report.category === activeCategory;
 
       const matchesSearch =
         !query ||
         report.title.toLowerCase().includes(query) ||
         report.description.toLowerCase().includes(query) ||
-        report.category.toLowerCase().includes(query)
+        report.category.toLowerCase().includes(query);
 
-      return matchesCategory && matchesSearch
-    })
-  }, [activeCategory, searchQuery])
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeCategory, searchQuery]);
+
+  const filteredAssessments = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return savedAssessments.filter((assessment) => {
+      const category =
+        assessment.assessmentType.charAt(0).toUpperCase() +
+        assessment.assessmentType.slice(1);
+
+      const matchesCategory =
+        activeCategory === "All reports" || category === activeCategory;
+
+      const matchesSearch =
+        !query ||
+        category.toLowerCase().includes(query) ||
+        String(assessment.prediction?.cancer_type || "")
+          .toLowerCase()
+          .includes(query) ||
+        String(assessment.prediction?.prediction ?? "")
+          .toLowerCase()
+          .includes(query);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [savedAssessments, activeCategory, searchQuery]);
 
   return (
     <div className="cure-reports">
@@ -184,6 +233,64 @@ function Reports() {
           .cr-summary-value { margin-top: 8px; }
           .cr-report-card { padding: 15px; }
         }
+
+        .cr-saved-section {
+  margin-bottom: 38px;
+}
+
+.cr-saved-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 19px 20px;
+  border: 1px solid var(--cr-line);
+  border-radius: 15px;
+  background: #fffefa;
+}
+
+.cr-saved-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.cr-saved-copy h3 {
+  margin: 7px 0;
+  font-size: 15px;
+}
+
+.cr-saved-copy p {
+  margin: 5px 0;
+  color: var(--cr-muted);
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.cr-saved-status {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 20px;
+  background: #eaf2e8;
+  color: #416c4d;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.cr-loading,
+.cr-fetch-error {
+  padding: 20px;
+  border: 1px solid var(--cr-line);
+  border-radius: 12px;
+  background: #fffefa;
+  color: var(--cr-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.cr-fetch-error {
+  border-color: #efd5d0;
+  color: #a44e43;
+}
       `}</style>
 
       <header className="cr-header">
@@ -198,7 +305,9 @@ function Reports() {
         <nav className="cr-header-nav" aria-label="Page navigation">
           <Link to="/">Home</Link>
           <Link to="/history">History</Link>
-          <Link to="/dashboard" className="cr-nav-button">Dashboard ↗</Link>
+          <Link to="/dashboard" className="cr-nav-button">
+            Dashboard ↗
+          </Link>
         </nav>
       </header>
 
@@ -213,13 +322,13 @@ function Reports() {
             <h1>Reports & records</h1>
             <p>
               A dedicated space for your assessment summaries and wellness
-              records. Reports will become available once assessment storage
-              and report generation are implemented.
+              records. Your completed assessments and their saved AI-assisted
+              classifications appear here.
             </p>
           </div>
           <span className="cr-mode">
             <span className="cr-mode-dot" />
-            Preview mode
+            Assessment records
           </span>
         </section>
 
@@ -229,8 +338,8 @@ function Reports() {
             <div className="cr-eyebrow">YOUR INFORMATION, ORGANISED</div>
             <h2>Clarity starts with a record.</h2>
             <p>
-              Complete a guided questionnaire to explore the CureAI experience.
-              Saving, report creation, and downloads are not connected yet.
+              View your completed assessments and revisit the classifications
+              saved to your CureAI account.
             </p>
           </div>
           <Link to="/dashboard" className="cr-banner-link">
@@ -241,32 +350,138 @@ function Reports() {
         <section className="cr-summary" aria-label="Report summary">
           <article className="cr-summary-card">
             <div className="cr-summary-label">Available reports</div>
-            <div className="cr-summary-value">0</div>
-            <div className="cr-summary-note">No generated reports in preview</div>
+            <div className="cr-summary-value">{savedAssessments.length}</div>
+            <div className="cr-summary-note">Saved assessment records</div>
           </article>
           <article className="cr-summary-card">
             <div className="cr-summary-label">Report downloads</div>
             <div className="cr-summary-value">0</div>
-            <div className="cr-summary-note">Download functionality not connected</div>
+            <div className="cr-summary-note">
+              Download functionality not connected
+            </div>
           </article>
           <article className="cr-summary-card">
             <div className="cr-summary-label">Assessment categories</div>
             <div className="cr-summary-value">04</div>
-            <div className="cr-summary-note">Questionnaire templates available</div>
+            <div className="cr-summary-note">
+              Questionnaire templates available
+            </div>
           </article>
+        </section>
+
+        <section className="cr-saved-section" aria-labelledby="cr-saved-title">
+          <div className="cr-library-heading">
+            <div>
+              <h2 id="cr-saved-title">Your saved assessments</h2>
+              <p>Completed assessments linked to your account.</p>
+            </div>
+            <span className="cr-mode">
+              <span className="cr-mode-dot" />
+              {savedAssessments.length} saved
+            </span>
+          </div>
+
+          {isLoading ? (
+            <div className="cr-loading" role="status">
+              Loading your saved assessments...
+            </div>
+          ) : fetchError ? (
+            <div className="cr-fetch-error" role="alert">
+              {fetchError}
+            </div>
+          ) : filteredAssessments.length > 0 ? (
+            <div className="cr-report-grid">
+              {filteredAssessments.map((assessment) => {
+                const category =
+                  assessment.assessmentType.charAt(0).toUpperCase() +
+                  assessment.assessmentType.slice(1);
+
+                return (
+                  <article className="cr-saved-card" key={assessment._id}>
+                    <span
+                      className={`cr-report-icon ${
+                        reportTypes.find(
+                          (item) => item.id === assessment.assessmentType,
+                        )?.color || "lavender"
+                      }`}
+                    >
+                      {reportTypes.find(
+                        (item) => item.id === assessment.assessmentType,
+                      )?.icon || "◈"}
+                    </span>
+
+                    <div className="cr-saved-copy">
+                      <div className="cr-report-category">
+                        {category.toUpperCase()} ASSESSMENT
+                      </div>
+
+                      <h3>
+                        {assessment.prediction?.cancer_type ||
+                          `${category} assessment`}
+                      </h3>
+
+                      <p>
+                        Model classification:{" "}
+                        <strong>
+                          {String(
+                            assessment.prediction?.prediction ?? "Unavailable",
+                          )}
+                        </strong>
+                      </p>
+
+                      <p>
+                        Completed:{" "}
+                        {assessment.createdAt
+                          ? new Date(assessment.createdAt).toLocaleString()
+                          : "Date unavailable"}
+                      </p>
+
+                      <span className="cr-saved-status">
+                        {assessment.status || "completed"}
+                      </span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="cr-empty">
+              <span className="cr-empty-icon">◈</span>
+              <h3>
+                {savedAssessments.length === 0
+                  ? "No saved assessments yet"
+                  : "No matching saved assessments"}
+              </h3>
+              <p>
+                {savedAssessments.length === 0
+                  ? "Complete an assessment while signed in, and its saved record will appear here."
+                  : "Try changing your search or category filter."}
+              </p>
+              {savedAssessments.length === 0 && (
+                <Link to="/dashboard">Explore assessments ↗</Link>
+              )}
+            </div>
+          )}
         </section>
 
         <section aria-labelledby="cr-library-title">
           <div className="cr-library-heading">
             <div>
-              <h2 id="cr-library-title" style={{ margin: 0, fontSize: 21, letterSpacing: '-.5px' }}>
+              <h2
+                id="cr-library-title"
+                style={{ margin: 0, fontSize: 21, letterSpacing: "-.5px" }}
+              >
                 Report library
               </h2>
-              <p>Search and explore the four available assessment categories.</p>
+              <p>
+                Search and explore the four available assessment categories.
+              </p>
             </div>
 
             <div className="cr-search-wrap">
-              <span className="cr-search-icon" aria-hidden="true">⌕</span>
+              <span className="cr-search-icon" aria-hidden="true">
+                ⌕
+              </span>
               <input
                 className="cr-search"
                 type="search"
@@ -283,7 +498,7 @@ function Reports() {
               <button
                 key={category}
                 type="button"
-                className={`cr-filter ${activeCategory === category ? 'active' : ''}`}
+                className={`cr-filter ${activeCategory === category ? "active" : ""}`}
                 aria-pressed={activeCategory === category}
                 onClick={() => setActiveCategory(category)}
               >
@@ -294,8 +509,8 @@ function Reports() {
 
           <div className="cr-results-line">
             <span>
-              <strong>{filteredTypes.length}</strong>{' '}
-              {filteredTypes.length === 1 ? 'category' : 'categories'} found
+              <strong>{filteredTypes.length}</strong>{" "}
+              {filteredTypes.length === 1 ? "category" : "categories"} found
             </span>
             <span>Assessment templates, not saved reports</span>
           </div>
@@ -333,8 +548,8 @@ function Reports() {
                 className="cr-filter active"
                 style={{ marginTop: 15 }}
                 onClick={() => {
-                  setSearchQuery('')
-                  setActiveCategory('All reports')
+                  setSearchQuery("");
+                  setActiveCategory("All reports");
                 }}
               >
                 Clear filters
@@ -355,7 +570,9 @@ function Reports() {
         </aside>
 
         <footer className="cr-footer">
-          <span>© {new Date().getFullYear()} CureAI · Intelligence for Wellness</span>
+          <span>
+            © {new Date().getFullYear()} CureAI · Intelligence for Wellness
+          </span>
           <span>
             <Link to="/history">History</Link>
             &nbsp; · &nbsp;
@@ -366,7 +583,7 @@ function Reports() {
         </footer>
       </main>
     </div>
-  )
+  );
 }
 
-export default Reports
+export default Reports;

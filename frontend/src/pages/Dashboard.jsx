@@ -1,87 +1,87 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext.jsx'
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth.js";
 
 const assessments = [
   {
-    id: 'thyroid',
-    number: '01',
-    title: 'Thyroid',
+    id: "thyroid",
+    number: "01",
+    title: "Thyroid",
     description:
-      'Explore thyroid-related symptoms, health history, and relevant indicators.',
-    icon: '◈',
-    color: 'lavender',
-    category: 'ENDOCRINE HEALTH',
-    time: '3–5 MIN',
+      "Explore thyroid-related symptoms, health history, and relevant indicators.",
+    icon: "◈",
+    color: "lavender",
+    category: "ENDOCRINE HEALTH",
+    time: "3–5 MIN",
   },
   {
-    id: 'skin',
-    number: '02',
-    title: 'Skin',
+    id: "skin",
+    number: "02",
+    title: "Skin",
     description:
-      'Record skin changes, their duration, and relevant health information.',
-    icon: '✳',
-    color: 'peach',
-    category: 'SKIN HEALTH',
-    time: '3–5 MIN',
+      "Record skin changes, their duration, and relevant health information.",
+    icon: "✳",
+    color: "peach",
+    category: "SKIN HEALTH",
+    time: "3–5 MIN",
   },
   {
-    id: 'lung',
-    number: '03',
-    title: 'Lung',
+    id: "lung",
+    number: "03",
+    title: "Lung",
     description:
-      'Document breathing symptoms, exposure history, and respiratory concerns.',
-    icon: '〰',
-    color: 'blue',
-    category: 'RESPIRATORY HEALTH',
-    time: '4–6 MIN',
+      "Document breathing symptoms, exposure history, and respiratory concerns.",
+    icon: "〰",
+    color: "blue",
+    category: "RESPIRATORY HEALTH",
+    time: "4–6 MIN",
   },
   {
-    id: 'breast',
-    number: '04',
-    title: 'Breast',
+    id: "breast",
+    number: "04",
+    title: "Breast",
     description:
-      'Record breast changes, relevant family history, and previous evaluations.',
-    icon: '♡',
-    color: 'pink',
-    category: 'BREAST HEALTH',
-    time: '3–5 MIN',
+      "Record breast changes, relevant family history, and previous evaluations.",
+    icon: "♡",
+    color: "pink",
+    category: "BREAST HEALTH",
+    time: "3–5 MIN",
   },
-]
+];
 
 const quickLinks = [
   {
-    icon: '◎',
-    title: 'Your profile',
-    description: 'Manage your personal details',
-    to: '/profile',
+    icon: "◎",
+    title: "Your profile",
+    description: "Manage your personal details",
+    to: "/profile",
   },
   {
-    icon: '◷',
-    title: 'Assessment history',
-    description: 'View saved assessment records',
-    to: '/history',
+    icon: "◷",
+    title: "Assessment history",
+    description: "View saved assessment records",
+    to: "/history",
   },
   {
-    icon: '▤',
-    title: 'Reports',
-    description: 'Explore your assessment reports',
-    to: '/reports',
+    icon: "▤",
+    title: "Reports",
+    description: "Explore your assessment reports",
+    to: "/reports",
   },
-]
+];
 
 function Dashboard() {
-  const navigate = useNavigate()
-  const { user, logout } = useAuth()
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
-  const firstName = user?.fullName?.trim().split(/\s+/)[0]
+  const firstName = user?.fullName?.trim().split(/\s+/)[0];
 
   async function handleLogout() {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Logout request failed:', error)
+      console.error("Logout request failed:", error);
     } finally {
-      navigate('/login', { replace: true })
+      navigate("/login", { replace: true });
     }
   }
 
@@ -359,10 +359,10 @@ function Dashboard() {
                 to="/profile"
                 className="cd-avatar"
                 aria-label="Open profile"
-                title={user?.fullName || 'Open profile'}
-                style={{ textDecoration: 'none' }}
+                title={user?.fullName || "Open profile"}
+                style={{ textDecoration: "none" }}
               >
-                {firstName ? firstName.charAt(0).toUpperCase() : '♡'}
+                {firstName ? firstName.charAt(0).toUpperCase() : "♡"}
               </Link>
 
               <button
@@ -372,7 +372,6 @@ function Dashboard() {
               >
                 Log out
               </button>
-
             </div>
           </header>
 
@@ -382,9 +381,12 @@ function Dashboard() {
                 <div className="cd-eyebrow">
                   {firstName
                     ? `WELCOME BACK, ${firstName.toUpperCase()}`
-                    : 'YOUR PERSONAL WELLNESS SPACE'}
+                    : "YOUR PERSONAL WELLNESS SPACE"}
                 </div>
-                <h1>A little more informed.<br />A little more empowered.</h1>
+                <h1>
+                  A little more informed.
+                  <br />A little more empowered.
+                </h1>
                 <p>
                   Welcome to CureAI. Explore guided health questionnaires,
                   organise your information, and take a more informed next step
@@ -408,7 +410,9 @@ function Dashboard() {
                   <h2 id="cd-assessments-title">Explore assessments</h2>
                   <p>Choose a health area to begin a guided questionnaire.</p>
                 </div>
-                <Link to="/" className="cd-text-link">Explore home ↗</Link>
+                <Link to="/" className="cd-text-link">
+                  Explore home ↗
+                </Link>
               </div>
 
               <div className="cd-assessment-grid">
@@ -440,7 +444,8 @@ function Dashboard() {
               <section className="cd-panel" aria-labelledby="cd-activity-title">
                 <h2 id="cd-activity-title">Recent activity</h2>
                 <p className="cd-panel-subtitle">
-                  Your assessment activity will appear here when history storage is connected.
+                  Your assessment activity will appear here when history storage
+                  is connected.
                 </p>
                 <div className="cd-empty">
                   <span className="cd-empty-icon">◷</span>
@@ -491,7 +496,9 @@ function Dashboard() {
             </aside>
 
             <footer className="cd-footer">
-              <span>© {new Date().getFullYear()} CureAI · Intelligence for Wellness</span>
+              <span>
+                © {new Date().getFullYear()} CureAI · Intelligence for Wellness
+              </span>
               <span>
                 <Link to="/">Home</Link>
                 &nbsp; · &nbsp;
@@ -502,7 +509,7 @@ function Dashboard() {
         </main>
       </div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

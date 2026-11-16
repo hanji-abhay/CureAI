@@ -1,4 +1,3 @@
-
 import jwt from "jsonwebtoken";
 import { createHash, randomBytes } from "node:crypto";
 import RefreshToken from "../models/RefreshToken.js";
@@ -16,8 +15,7 @@ function getCookieOptions(rememberMe = false) {
   };
 
   if (rememberMe) {
-    options.maxAge =
-      REMEMBERED_SESSION_DAYS * 24 * 60 * 60 * 1000;
+    options.maxAge = REMEMBERED_SESSION_DAYS * 24 * 60 * 60 * 1000;
   }
 
   return options;
@@ -56,11 +54,9 @@ function createAccessToken(userId) {
     throw new Error("JWT_SECRET is not configured.");
   }
 
-  return jwt.sign(
-    { userId: userId.toString() },
-    process.env.JWT_SECRET,
-    { expiresIn: "15m" }
-  );
+  return jwt.sign({ userId: userId.toString() }, process.env.JWT_SECRET, {
+    expiresIn: "15m",
+  });
 }
 
 async function createSession(user, res, rememberMe = false) {
@@ -77,11 +73,7 @@ async function createSession(user, res, rememberMe = false) {
     rememberMe,
   });
 
-  res.cookie(
-    COOKIE_NAME,
-    refreshToken,
-    getCookieOptions(rememberMe)
-  );
+  res.cookie(COOKIE_NAME, refreshToken, getCookieOptions(rememberMe));
 
   return createAccessToken(user._id);
 }
