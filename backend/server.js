@@ -91,6 +91,22 @@ async function startServer() {
       });
     }
 
+    try {
+      await mongoose.connection.db.command({
+        find: "users",
+        filter: {},
+        limit: 1,
+      });
+
+      console.log("RAW MONGODB FIND TEST: SUCCESS");
+    } catch (error) {
+      console.error("RAW MONGODB FIND TEST: FAILED", {
+        message: error.message,
+        code: error.code,
+        codeName: error.codeName,
+      });
+    }
+
     console.log('MongoDB connected successfully!');
 
     app.listen(PORT, () => {
