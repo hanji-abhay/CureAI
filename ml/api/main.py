@@ -1,4 +1,4 @@
-ï»¿from pathlib import Path
+﻿from pathlib import Path
 
 import joblib
 import pandas as pd
@@ -6,7 +6,7 @@ import pandas as pd
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from schemas import (
+from .schemas import (
     ThyroidInput,
     SkinInput,
     LungInput,

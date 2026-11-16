@@ -1,28 +1,29 @@
-import { useState } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
-import { AuthProvider } from "./context/AuthContext.jsx";
-import { useAuth } from "./context/useAuth.js";
+import { AuthProvider } from './context/AuthContext.jsx';
+import { useAuth } from './context/useAuth.js';
 
-import Landing from "./pages/Landing.jsx";
-import Home from "./pages/Home.jsx";
+import Landing from './pages/Landing.jsx';
+import Home from './pages/Home.jsx';
 
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import ForgotPassword from "./pages/ForgotPassword.jsx";
-import ResetPassword from "./pages/ResetPassword.jsx";
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
 
-import Dashboard from "./pages/Dashboard.jsx";
-import Profile from "./pages/Profile.jsx";
-import History from "./pages/History.jsx";
-import Reports from "./pages/Reports.jsx";
+import Dashboard from './pages/Dashboard.jsx';
+import Profile from './pages/Profile.jsx';
+import History from './pages/History.jsx';
+import Reports from './pages/Reports.jsx';
 
-import ThyroidAssessment from "./pages/ThyroidAssessment.jsx";
-import SkinAssessment from "./pages/SkinAssessment.jsx";
-import LungAssessment from "./pages/LungAssessment.jsx";
-import BreastAssessment from "./pages/BreastAssessment.jsx";
+import ThyroidAssessment from './pages/ThyroidAssessment.jsx';
+import SkinAssessment from './pages/SkinAssessment.jsx';
+import LungAssessment from './pages/LungAssessment.jsx';
+import BreastAssessment from './pages/BreastAssessment.jsx';
 
-import FloatingDock from "./components/FloatingDock.jsx";
+import FloatingDock from './components/FloatingDock.jsx';
+import ReportAnalyzer from './pages/ReportAnalyzer.jsx';
 
 function AuthUnavailable() {
   const { authError, retryAuth, isCheckingAuth } = useAuth();
@@ -30,34 +31,34 @@ function AuthUnavailable() {
   return (
     <div
       style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeContent: "center",
-        justifyItems: "center",
-        gap: "16px",
-        padding: "24px",
-        background: "#eee5d2",
-        color: "#244c3b",
-        fontFamily: "inherit",
-        textAlign: "center",
+        minHeight: '100vh',
+        display: 'grid',
+        placeContent: 'center',
+        justifyItems: 'center',
+        gap: '16px',
+        padding: '24px',
+        background: '#eee5d2',
+        color: '#244c3b',
+        fontFamily: 'inherit',
+        textAlign: 'center',
       }}
     >
       <h2>We can't verify your session right now.</h2>
-      <p>{authError || "Please check your connection and try again."}</p>
+      <p>{authError || 'Please check your connection and try again.'}</p>
       <button
         type="button"
         onClick={retryAuth}
         disabled={isCheckingAuth}
         style={{
-          padding: "12px 20px",
-          border: "none",
-          borderRadius: "8px",
-          background: "#244c3b",
-          color: "#fff",
-          cursor: isCheckingAuth ? "wait" : "pointer",
+          padding: '12px 20px',
+          border: 'none',
+          borderRadius: '8px',
+          background: '#244c3b',
+          color: '#fff',
+          cursor: isCheckingAuth ? 'wait' : 'pointer',
         }}
       >
-        {isCheckingAuth ? "Checking..." : "Try again"}
+        {isCheckingAuth ? 'Checking...' : 'Try again'}
       </button>
     </div>
   );
@@ -74,12 +75,12 @@ function ProtectedRoute({ children }) {
     return (
       <div
         style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: "#eee5d2",
-          color: "#244c3b",
-          fontFamily: "inherit",
+          minHeight: '100vh',
+          display: 'grid',
+          placeItems: 'center',
+          background: '#eee5d2',
+          color: '#244c3b',
+          fontFamily: 'inherit',
         }}
       >
         Restoring your CureAI session...
@@ -107,12 +108,12 @@ function GuestRoute({ children }) {
     return (
       <div
         style={{
-          minHeight: "100vh",
-          display: "grid",
-          placeItems: "center",
-          background: "#eee5d2",
-          color: "#244c3b",
-          fontFamily: "inherit",
+          minHeight: '100vh',
+          display: 'grid',
+          placeItems: 'center',
+          background: '#eee5d2',
+          color: '#244c3b',
+          fontFamily: 'inherit',
         }}
       >
         Restoring your CureAI session...
@@ -133,26 +134,26 @@ function GuestRoute({ children }) {
 
 function AppContent() {
   const [showIntro, setShowIntro] = useState(
-    () => !sessionStorage.getItem("cureai-intro-seen"),
+    () => !sessionStorage.getItem('cureai-intro-seen'),
   );
 
   const location = useLocation();
 
   function finishIntro() {
-    sessionStorage.setItem("cureai-intro-seen", "true");
+    sessionStorage.setItem('cureai-intro-seen', 'true');
     setShowIntro(false);
   }
 
   const authPaths = [
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password",
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
   ];
 
   const showDock = !showIntro && !authPaths.includes(location.pathname);
 
-  if (showIntro && location.pathname === "/") {
+  if (showIntro && location.pathname === '/') {
     return <Landing onComplete={finishIntro} />;
   }
 
@@ -217,6 +218,15 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/report-analyzer"
+          element={
+            <ProtectedRoute>
+              <ReportAnalyzer />
             </ProtectedRoute>
           }
         />

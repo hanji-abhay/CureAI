@@ -1,29 +1,30 @@
-import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 
 const groups = [
   {
-    title: "OVERVIEW",
+    title: 'OVERVIEW',
     items: [
-      { label: "Home", path: "/", icon: "home" },
-      { label: "Dashboard", path: "/dashboard", icon: "dashboard" },
+      { label: 'Home', path: '/', icon: 'home' },
+      { label: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
     ],
   },
   {
-    title: "ASSESSMENTS",
+    title: 'ASSESSMENTS',
     items: [
-      { label: "Thyroid", path: "/assessments/thyroid", icon: "thyroid" },
-      { label: "Skin", path: "/assessments/skin", icon: "skin" },
-      { label: "Lung", path: "/assessments/lung", icon: "lung" },
-      { label: "Breast", path: "/assessments/breast", icon: "breast" },
+      { label: 'Thyroid', path: '/assessments/thyroid', icon: 'thyroid' },
+      { label: 'Skin', path: '/assessments/skin', icon: 'skin' },
+      { label: 'Lung', path: '/assessments/lung', icon: 'lung' },
+      { label: 'Breast', path: '/assessments/breast', icon: 'breast' },
     ],
   },
   {
-    title: "YOUR SPACE",
+    title: 'YOUR SPACE',
     items: [
-      { label: "History", path: "/history", icon: "history" },
-      { label: "Reports", path: "/reports", icon: "reports" },
-      { label: "Profile", path: "/profile", icon: "profile" },
+      { label: 'History', path: '/history', icon: 'history' },
+      { label: 'Reports', path: '/reports', icon: 'reports' },
+      { label: 'Report Analyzer', path: '/report-analyzer', icon: 'reports' },
+      { label: 'Profile', path: '/profile', icon: 'profile' },
     ],
   },
 ];
@@ -32,13 +33,13 @@ function DockIcon({ name, size = 19 }) {
   const common = {
     width: size,
     height: size,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
     strokeWidth: 1.7,
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    "aria-hidden": true,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-hidden': true,
   };
 
   const paths = {
@@ -138,10 +139,10 @@ function FloatingDock() {
   const expanded = pinned || (hovered && !dismissed);
 
   const authPaths = [
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password",
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
   ];
 
   if (authPaths.includes(location.pathname)) return null;
@@ -159,8 +160,8 @@ function FloatingDock() {
 
   return (
     <div
-      className={`cure-dock ${expanded ? "is-expanded" : ""} ${
-        wide ? "is-wide" : ""
+      className={`cure-dock ${expanded ? 'is-expanded' : ''} ${
+        wide ? 'is-wide' : ''
       }`}
       onMouseLeave={() => {
         setHovered(false);
@@ -505,12 +506,12 @@ function FloatingDock() {
             className="cure-dock-expand"
             onClick={() => setWide((current) => !current)}
             aria-label={
-              wide ? "Collapse sidebar labels" : "Expand sidebar labels"
+              wide ? 'Collapse sidebar labels' : 'Expand sidebar labels'
             }
             aria-pressed={wide}
-            title={wide ? "Collapse sidebar" : "Expand sidebar"}
+            title={wide ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <DockIcon name={wide ? "collapse" : "expand"} size={17} />
+            <DockIcon name={wide ? 'collapse' : 'expand'} size={17} />
           </button>
         </div>
 
@@ -522,10 +523,10 @@ function FloatingDock() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                end={item.path === "/"}
+                end={item.path === '/'}
                 tabIndex={expanded ? 0 : -1}
                 className={({ isActive }) =>
-                  `cure-dock-link ${isActive ? "active" : ""}`
+                  `cure-dock-link ${isActive ? 'active' : ''}`
                 }
                 aria-label={item.label}
                 title={wide ? undefined : item.label}
@@ -551,11 +552,11 @@ function FloatingDock() {
           if (!pinned && !dismissed) setHovered(true);
         }}
         onClick={handleTriggerClick}
-        aria-label={expanded ? "Collapse navigation" : "Expand navigation"}
+        aria-label={expanded ? 'Collapse navigation' : 'Expand navigation'}
         aria-expanded={expanded}
-        title={expanded ? "Collapse navigation" : "Open navigation"}
+        title={expanded ? 'Collapse navigation' : 'Open navigation'}
       >
-        <DockIcon name={expanded ? "close" : "menu"} size={25} />
+        <DockIcon name={expanded ? 'close' : 'menu'} size={25} />
         {pinned && <span className="cure-dock-pin" />}
       </button>
     </div>
