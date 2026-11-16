@@ -6,7 +6,7 @@ import authRoutes from './routes/authRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import assessmentRoutes from './routes/assessmentRoutes.js';
 import reportAnalyzerRoutes from './routes/reportAnalyzerRoutes.js';
-import User from './models/User.js';
+
 
 dotenv.config();
 
@@ -73,39 +73,6 @@ async function startServer() {
       "MongoDB permission diagnostic:",
       JSON.stringify(connectionStatus.authInfo, null, 2)
     );
-
-    console.log("User model connection:", {
-      sameConnection: User.db === mongoose.connection,
-      database: User.db.name,
-      collection: User.collection.name,
-    });
-
-    try {
-      await User.findOne({}).select("_id").lean();
-      console.log("USER MODEL FIND TEST: SUCCESS");
-    } catch (error) {
-      console.error("USER MODEL FIND TEST: FAILED", {
-        message: error.message,
-        code: error.code,
-        codeName: error.codeName,
-      });
-    }
-
-    try {
-      await mongoose.connection.db.command({
-        find: "users",
-        filter: {},
-        limit: 1,
-      });
-
-      console.log("RAW MONGODB FIND TEST: SUCCESS");
-    } catch (error) {
-      console.error("RAW MONGODB FIND TEST: FAILED", {
-        message: error.message,
-        code: error.code,
-        codeName: error.codeName,
-      });
-    }
 
     console.log('MongoDB connected successfully!');
 
