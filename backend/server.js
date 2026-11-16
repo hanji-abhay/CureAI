@@ -63,6 +63,16 @@ async function startServer() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
 
+    const connectionStatus = await mongoose.connection.db.admin().command({
+      connectionStatus: 1,
+      showPrivileges: true,
+    });
+
+    console.log(
+      "MongoDB permission diagnostic:",
+      JSON.stringify(connectionStatus.authInfo, null, 2)
+    );
+
     console.log('MongoDB connected successfully!');
 
     app.listen(PORT, () => {
