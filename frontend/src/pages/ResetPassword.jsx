@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+const API_URL = "";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();

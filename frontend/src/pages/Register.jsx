@@ -52,7 +52,7 @@ function Register() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/auth/register`,
+        "/api/auth/register",
         {
           method: "POST",
           headers: {
