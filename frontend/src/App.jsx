@@ -151,7 +151,8 @@ function AppContent() {
     '/reset-password',
   ];
 
-  const showDock = !showIntro && !authPaths.includes(location.pathname);
+  const isIntroVisible = showIntro && location.pathname === "/";
+  const showDock = !isIntroVisible && !authPaths.includes(location.pathname);
 
   if (showIntro && location.pathname === '/') {
     return <Landing onComplete={finishIntro} />;

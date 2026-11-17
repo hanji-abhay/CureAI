@@ -7,16 +7,17 @@ const REMEMBERED_SESSION_DAYS = 30;
 const TEMPORARY_SESSION_HOURS = 12;
 
 function getCookieOptions(rememberMe = false) {
+  const isProd = process.env.NODE_ENV === "production";
+
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     path: "/api/auth",
+    maxAge: rememberMe
+      ? REMEMBERED_SESSION_DAYS * 24 * 60 * 60 * 1000
+      : TEMPORARY_SESSION_HOURS * 60 * 60 * 1000,
   };
-
-  if (rememberMe) {
-    options.maxAge = REMEMBERED_SESSION_DAYS * 24 * 60 * 60 * 1000;
-  }
 
   return options;
 }
@@ -79,7 +80,14 @@ async function createSession(user, res, rememberMe = false) {
 }
 
 function clearRefreshCookie(res) {
-  res.clearCookie(COOKIE_NAME, getCookieOptions(false));
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/api/auth",
+  });
 }
 
 export {
