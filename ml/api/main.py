@@ -48,7 +48,7 @@ MODEL_DIR = BASE_DIR / "models"
 # ==================================================
 
 thyroid_model = joblib.load(
-    MODEL_DIR / "thyroid_api_model.joblib"
+    MODEL_DIR / "thyroid_api_model_compact_candidate.joblib"
 )
 
 skin_model = joblib.load(
@@ -175,3 +175,4 @@ def predict_breast(data: BreastInput):
         "prediction": int(prediction),
         "message": "This is an AI-assisted preliminary classification, not a medical diagnosis."
     }
+
